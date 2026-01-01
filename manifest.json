@@ -1,0 +1,17 @@
+{
+  "short_name": "BadgeReversi",
+  "name": "Badge Reversi Ultimate",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5610/5610944.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#4caf50"
+}
