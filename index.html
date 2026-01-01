@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Badge Reversi</title>
+    <style>
+        :root {
+            --board-color: #2e7d32;
+            --accent: #4caf50;
+            --p1-neon: #4caf50;
+            --p2-neon: #2196f3;
+            --board-size: 75vmin; 
+            --cell-size: calc(var(--board-size) / 8.5);
+            --badge-size: calc(var(--cell-size) * 0.7);
+            --bg-color: #f8f8f8;
+            --text-color: #1a1a1a;
+            --card-bg: rgba(0, 0, 0, 0.05);
+            --setup-bg: rgba(255, 255, 255, 0.98);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0a0a0a;
+                --text-color: #ffffff;
+                --card-bg: rgba(255, 255, 255, 0.05);
+                --setup-bg: rgba(10, 10, 10, 0.98);
+            }
+        }
+
+        body {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color); color: var(--text-color); 
+            overflow: hidden; transition: background 0.4s;
+        }
+
+        /* [신규] 배지 확대/축소(Pulse) 애니메이션 */
+        @keyframes pulse {
+            0% { transform: scale(1.1); filter: drop-shadow(0 0 5px var(--accent)); }
+            50% { transform: scale(1.35); filter: drop-shadow(0 0 20px var(--accent)); }
+            100% { transform: scale(1.1); filter: drop-shadow(0 0 5px var(--accent)); }
+        }
+
+        .focus-card { font-size: 40px; transition: 0.4s; opacity: 0.1; transform: scale(0.8); }
+        
+        /* 현재 차례인 배지에 애니메이션 적용 */
+        .focus-card.active { 
+            opacity: 1; 
+            animation: pulse 1.5s infinite ease-in-out; 
+            z-index: 10;
+        }
+
+        /* 컨트롤 및 기타 스타일 (v18과 동일) */
+        .top-controls { display: flex; gap: 12px; margin-bottom: 15px; }
+        .btn-ui { 
+            padding: 8px 16px; border-radius: 15px; border: 1px solid rgba(128,128,128,0.3); 
+            background: var(--card-bg); color: var(--text-color); cursor: pointer; 
+            font-weight: bold; font-size: 13px; transition: 0.2s;
+        }
+        .btn-ui:hover:not(:disabled) { background: var(--accent); color: white; border-color: var(--accent); }
+        .btn-ui:disabled { opacity: 0.1; cursor: not-allowed; }
+
+        #game-message {
+            position: fixed; top: 15%; background: var(--accent); color: white;
+            padding: 10px 30px; border-radius: 30px; font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: translateY(-100px); opacity: 0; transition: 0.5s; z-index: 150;
+        }
+        #game-message.show { transform: translateY(0); opacity: 1; }
+
+        #top-indicator { width: 250px; height: 4px; background: rgba(128,128,128,0.2); border-radius: 2px; margin-bottom: 15px; position: relative; overflow: hidden; }
+        #progress-bar { position: absolute; width: 50%; height: 100%; background: var(--accent); transition: left 0.4s ease; }
+
+        #focus-card-container { display: flex; align-items: center; gap: 40px; margin-bottom: 10px; }
+
+        #board-container { padding: 8px; border-radius: 15px; transition: 0.6s ease; background: var(--card-bg); }
+        body.p1-turn #board-container { box-shadow: 0 0 40px var(--p1-neon); }
+        body.p2-turn #board-container { box-shadow: 0 0 40px var(--p2-neon); }
+
+        #board { display: grid; grid-template-columns: repeat(8, var(--cell-size)); grid-template-rows: repeat(8, var(--cell-size)); gap: 1.5px; background-color: rgba(128,128,128,0.2); border-radius: 8px; }
+        .cell { background-color: var(--board-color); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: var(--badge-size); }
+
+        #score-panel { display: flex; gap: 40px; margin-top: 15px; font-size: 20px; font-weight: 800; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--setup-bg); color: var(--text-color); padding: 30px; border-radius: 25px; text-align: center; border: 2px solid var(--accent); animation: modalPop 0.3s ease; max-width: 320px; width: 85%; }
+        @keyframes modalPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        #setup-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: flex; align-items: center; justify-content: center; z-index: 300; }
+        .setup-container { background: var(--setup-bg); padding: 30px; border-radius: 28px; text-align: center; width: 85%; max-width: 420px; border: 1px solid rgba(128,128,128,0.3); }
+    </style>
+</head>
+<body class="p1-turn">
+
+    <div id="game-message">Message</div>
+
+    <div id="setup-screen">
+        <div class="setup-container">
+            <h2 style="color:var(--accent); margin-top:0;">BADGE REVERSI</h2>
+            <div id="p1-emojis" style="margin: 15px 0; display: flex; justify-content: center; gap: 8px;"></div>
+            <div id="p2-emojis" style="margin: 15px 0; display: flex; justify-content: center; gap: 8px;"></div>
+            <div id="theme-options" style="margin-top:15px; display: flex; justify-content: center; gap: 10px;"></div>
+            <button class="btn-ui" style="background:var(--accent); color:white; margin-top:20px; width:100%;" onclick="startGame()">BATTLE START</button>
+        </div>
+    </div>
+
+    <div id="restart-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="font-size: 40px; margin-bottom: 10px;">🔄</div>
+            <h3 style="margin-top: 0;">Restart Game?</h3>
+            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                <button class="btn-ui" style="flex:1" onclick="confirmRestart(true)">Restart</button>
+                <button class="btn-ui" style="flex:1; background: transparent;" onclick="confirmRestart(false)">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div id="modal-winner-icon" style="font-size: 60px;">🏆</div>
+            <div id="modal-result-text" style="font-size: 22px; margin: 15px 0; font-weight:bold;">WINNER!</div>
+            <button class="btn-ui" style="background: var(--accent); color:white; width: 100%; font-size: 16px;" onclick="closeResultModal()">Play Again</button>
+        </div>
+    </div>
+
+    <div class="top-controls">
+        <button class="btn-ui" onclick="location.reload()">⚙️ Settings</button>
+        <button class="btn-ui" onclick="openRestartModal()">🔄 Restart</button>
+        <button id="pass-btn" class="btn-ui" onclick="handlePass()" disabled>⏭️ Pass</button>
+    </div>
+
+    <div id="top-indicator"><div id="progress-bar"></div></div>
+
+    <div id="focus-card-container">
+        <div id="p1-card" class="focus-card active"></div>
+        <div style="font-size: 14px; opacity: 0.5; font-weight: 900;">VS</div>
+        <div id="p2-card" class="focus-card"></div>
+    </div>
+
+    <div id="board-container"><div id="board"></div></div>
+
+    <div id="score-panel">
+        <div id="p1-score-ui"></div>
+        <div id="p2-score-ui"></div>
+    </div>
+
+    <script>
+        const emojiPool = ['⚫','⚪','🐻','🐰','🌝','🌚','🔥','❄️','🍔','🍟','🎮','⭐','🍀','🍄','🐯','🦊','🥑','🚀','💎','👻','🍎','🎈','🐧','🎸','🍕','🍦','🦁','🐨','🌈','🌊'];
+        const colorPool = ['#2e7d32','#1565c0','#c62828','#6a1b9a','#ef6c00','#00838f','#37474f','#283593'];
+        let board = [], currentPlayer = 1;
+        let p1Badge, p2Badge;
+
+        function refreshBadges() {
+            [1, 2].forEach(p => {
+                const container = document.getElementById(`p${p}-emojis`);
+                const randoms = [...emojiPool].sort(() => 0.5 - Math.random()).slice(0, 5);
+                container.innerHTML = randoms.map((e, i) => `<span style="font-size:25px; cursor:pointer; padding:6px; border:2px solid ${i===0?'var(--accent)':'rgba(128,128,128,0.3)'}; border-radius:10px;" onclick="selectBadge(${p}, '${e}', this)">${e}</span>`).join('');
+                p === 1 ? p1Badge = randoms[0] : p2Badge = randoms[0];
+            });
+        }
+
+        function refreshThemes() {
+            const container = document.getElementById('theme-options');
+            const randoms = [...colorPool].sort(() => 0.5 - Math.random()).slice(0, 5);
+            container.innerHTML = randoms.map((c, i) => `<div style="width:25px; height:25px; border-radius:50%; background:${c}; cursor:pointer; border:2px solid ${i===0?'var(--accent)':'transparent'};" onclick="selectTheme('${c}', this)"></div>`).join('');
+            selectTheme(randoms[0], container.firstChild);
+        }
+
+        function selectTheme(color, el) {
+            document.querySelectorAll('#theme-options div').forEach(d => d.style.borderColor = 'transparent');
+            el.style.borderColor = 'var(--accent)';
+            document.documentElement.style.setProperty('--board-color', color);
+            document.documentElement.style.setProperty('--p1-neon', color);
+            document.documentElement.style.setProperty('--p2-neon', color === '#1565c0' ? '#4caf50' : '#2196f3');
+        }
+
+        function selectBadge(p, emoji, el) {
+            document.querySelectorAll(`#p${p}-emojis span`).forEach(s => s.style.borderColor = 'rgba(128,128,128,0.3)');
+            el.style.borderColor = 'var(--accent)';
+            p === 1 ? p1Badge = emoji : p2Badge = emoji;
+        }
+
+        function startGame() {
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('p1-card').innerText = p1Badge;
+            document.getElementById('p2-card').innerText = p2Badge;
+            initGame();
+        }
+
+        function showMessage(msg) {
+            const el = document.getElementById('game-message');
+            el.innerText = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2000);
+        }
+
+        function openRestartModal() { document.getElementById('restart-modal').style.display = 'flex'; }
+        function confirmRestart(shouldRestart) {
+            document.getElementById('restart-modal').style.display = 'none';
+            if(shouldRestart) initGame();
+        }
+
+        function initGame() {
+            board = Array(8).fill().map(() => Array(8).fill(0));
+            board[3][3] = 2; board[3][4] = 1; board[4][3] = 1; board[4][4] = 2;
+            currentPlayer = 1; renderBoard(); updateUI();
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            let s1 = 0, s2 = 0;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.onclick = () => handleMove(r, c);
+                    if (board[r][c] !== 0) {
+                        cell.innerText = board[r][c] === 1 ? p1Badge : p2Badge;
+                        board[r][c] === 1 ? s1++ : s2++;
+                    }
+                    boardEl.appendChild(cell);
+                }
+            }
+            document.getElementById('p1-score-ui').innerText = `${p1Badge} ${s1}`;
+            document.getElementById('p2-score-ui').innerText = `${p2Badge} ${s2}`;
+        }
+
+        function handleMove(r, c) {
+            if (board[r][c] !== 0) return;
+            const flips = getFlips(r, c, currentPlayer);
+            if (flips.length === 0) return;
+            board[r][c] = currentPlayer;
+            flips.forEach(([fr, fc]) => board[fr][fc] = currentPlayer);
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            renderBoard(); updateUI();
+            checkGameState();
+        }
+
+        function handlePass() {
+            const badge = currentPlayer === 1 ? p1Badge : p2Badge;
+            showMessage(`${badge} Passed Turn!`);
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            updateUI();
+            checkGameState();
+        }
+
+        function checkGameState() {
+            const currentCanMove = canMove(currentPlayer);
+            const opponentCanMove = canMove(currentPlayer === 1 ? 2 : 1);
+            document.getElementById('pass-btn').disabled = currentCanMove;
+            if (!currentCanMove && opponentCanMove) {
+                const badge = currentPlayer === 1 ? p1Badge : p2Badge;
+                showMessage(`${badge} has no moves!`);
+            }
+            if (!currentCanMove && !opponentCanMove) showFinalModal();
+        }
+
+        function getFlips(r, c, p) {
+            const opp = p === 1 ? 2 : 1;
+            const dirs = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+            let all = [];
+            dirs.forEach(([dr, dc]) => {
+                let temp = [], nr = r + dr, nc = c + dc;
+                while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] === opp) { temp.push([nr, nc]); nr += dr; nc += dc; }
+                if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] === p) all = all.concat(temp);
+            });
+            return all;
+        }
+
+        function canMove(p) {
+            for (let r = 0; r < 8; r++)
+                for (let c = 0; c < 8; c++)
+                    if (board[r][c] === 0 && getFlips(r, c, p).length > 0) return true;
+            return false;
+        }
+
+        function updateUI() {
+            document.body.className = currentPlayer === 1 ? 'p1-turn' : 'p2-turn';
+            document.getElementById('progress-bar').style.left = currentPlayer === 1 ? '0%' : '50%';
+            document.getElementById('p1-card').className = 'focus-card' + (currentPlayer === 1 ? ' active' : '');
+            document.getElementById('p2-card').className = 'focus-card' + (currentPlayer === 2 ? ' active' : '');
+            document.getElementById('pass-btn').disabled = canMove(currentPlayer);
+            
+            // 턴에 따라 애니메이션 강조 색상 변경
+            const activeColor = currentPlayer === 1 ? 'var(--p1-neon)' : 'var(--p2-neon)';
+            document.documentElement.style.setProperty('--accent', activeColor);
+        }
+
+        function showFinalModal() {
+            const s1 = board.flat().filter(x => x === 1).length;
+            const s2 = board.flat().filter(x => x === 2).length;
+            const winnerIcon = document.getElementById('modal-winner-icon');
+            const resultText = document.getElementById('modal-result-text');
+            if (s1 > s2) { winnerIcon.innerText = p1Badge; resultText.innerText = `P1 WINS! (${s1}:${s2})`; }
+            else if (s2 > s1) { winnerIcon.innerText = p2Badge; resultText.innerText = `P2 WINS! (${s2}:${s1})`; }
+            else { winnerIcon.innerText = "🤝"; resultText.innerText = `DRAW! (${s1}:${s2})`; }
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function closeResultModal() {
+            document.getElementById('result-modal').style.display = 'none';
+            initGame();
+        }
+
+        refreshBadges(); refreshThemes();
+    </script>
+</body>
+</html>
