@@ -3,236 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Exodus: Heavenly Glory v3.2</title>
+    <title>Exodus: Red Sea v3.2</title>
     <style>
         :root {
             --sea-deep: #002f6c; --sea-top: #4fc3f7; --foam: rgba(255,255,255,0.8);
             --ground-dark: #795548; --ground-light: #d4b46a; --sand: #f0d082;
-            --accent: #ffd700; --enemy-glow: rgba(255, 0, 0, 0.8);
+            --accent: #ffd700;
         }
 
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Malgun Gothic', sans-serif; background: #000; }
+        body { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: sans-serif; }
+
+        /* 홈 버튼 */
+        .home-btn {
+            position: fixed; top: 15px; left: 15px; z-index: 10000;
+            text-decoration: none; color: white; background: rgba(0,0,0,0.4);
+            padding: 8px 16px; border-radius: 20px; font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(5px);
+        }
+
+        #setup-screen { position: fixed; inset: 0; background: radial-gradient(circle, #01579b, #000); display: flex; align-items: center; justify-content: center; z-index: 5000; color: white; text-align: center; }
+        .diff-box { background: rgba(0,0,0,0.8); padding: 40px; border-radius: 40px; border: 3px solid var(--accent); }
+        .diff-btn { margin-top: 15px; padding: 15px 30px; border-radius: 20px; border: none; background: #fff; color: #000; font-weight: bold; cursor: pointer; display: block; width: 100%; font-size: 18px; }
+
+        #game-container { position: relative; width: 100vw; height: 100vh; display: none; perspective: 1000px; }
+        #path { position: absolute; left: 50%; top: 0; width: 400px; height: 100%; transform: translateX(-50%); background: var(--sand); transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; box-shadow: inset 0 0 50px rgba(0,0,0,0.5); }
         
-        /* 난이도 화면 */
-        #setup-screen { position: fixed; inset: 0; background: radial-gradient(circle at center, #01579b, #000); display: flex; align-items: center; justify-content: center; z-index: 5000; color: white; }
-        .setup-box { background: rgba(0,0,0,0.9); padding: 40px; border-radius: 50px; border: 4px solid var(--accent); text-align: center; width: 85%; max-width: 440px; }
-        .diff-group { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 30px; cursor: pointer; margin-top: 15px; border: 2px solid transparent; transition: 0.3s; }
-        .diff-group:hover { background: rgba(255,255,255,0.15); border-color: var(--accent); transform: translateY(-5px); }
+        .sea-wall { position: absolute; top: 0; width: 50vw; height: 100%; z-index: 5; transition: margin 1.2s ease-in-out; }
+        .wall-left { right: 50%; margin-right: 200px; background: linear-gradient(to right, var(--sea-deep), var(--sea-top)); transform: rotateY(30deg); border-right: 10px solid white; }
+        .wall-right { left: 50%; margin-left: 200px; background: linear-gradient(to left, var(--sea-deep), var(--sea-top)); transform: rotateY(-30deg); border-left: 10px solid white; }
 
-        #game-container { position: relative; width: 100vw; height: 100vh; background: #001a33; overflow: hidden; perspective: 1200px; display: none; transition: background 2s ease; }
+        #moses { position: absolute; left: 50%; bottom: 100px; transform: translateX(-50%); font-size: 60px; z-index: 10; transition: bottom 0.5s; }
+        #goal { position: absolute; top: 0; left: 0; width: 100%; height: 80px; background: #2e7d32; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; z-index: 5; }
+
+        #input-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; }
+        input { padding: 15px 30px; border-radius: 30px; border: 4px solid var(--accent); font-size: 20px; text-align: center; width: 300px; outline: none; }
+
+        .word { position: absolute; color: white; background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 20px; border: 2px solid gold; font-weight: bold; transform: translateX(-50%); z-index: 50; }
         
-        /* [개선] 성전 및 천상의 빛 효과 */
-        #goal { position: absolute; top: -50px; left: 50%; transform: translateX(-50%) rotateX(-25deg); width: 150%; height: 200px; background: linear-gradient(to bottom, #2e7d32, #81c784); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; border-bottom: 20px solid #1b5e20; transition: all 1.5s ease; }
-        
-        /* 화이트아웃 레이어 */
-        #white-out { position: fixed; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 8000; transition: opacity 0.5s ease; }
-
-        /* 할렐루야 텍스트 */
-        #victory-text { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); color: gold; font-size: 60px; font-weight: 900; z-index: 9000; text-shadow: 0 0 30px white; opacity: 0; transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        /* 바다 및 지면 설정 */
-        #path { position: absolute; left: 50%; top: 0; width: 450px; height: 100%; background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%), repeating-linear-gradient(to bottom, var(--ground-dark), var(--ground-dark) 2px, var(--ground-light) 5px); background-color: var(--sand); transform: translateX(-50%); transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; }
-        .sea-wall { position: absolute; top: 0; width: 60vw; height: 140%; z-index: 5; pointer-events: none; transition: margin 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .wall-left { right: 50%; margin-right: 225px; transform-origin: right center; border-right: 25px solid var(--foam); animation: seaWiggleLeft 4s infinite ease-in-out; }
-        .wall-right { left: 50%; margin-left: 225px; transform-origin: left center; border-left: 25px solid var(--foam); animation: seaWiggleRight 4s infinite ease-in-out; }
-        @keyframes seaWiggleLeft { 0%, 100% { transform: rotateY(40deg) skewY(-5deg) translateX(0); } 50% { transform: rotateY(43deg) skewY(-6deg) translateX(-15px); } }
-        @keyframes seaWiggleRight { 0%, 100% { transform: rotateY(-40deg) skewY(5deg) translateX(0); } 50% { transform: rotateY(-43deg) skewY(6deg) translateX(15px); } }
-
-        /* 입자 애니메이션 */
-        .bless-particle { position: fixed; pointer-events: none; z-index: 6000; border-radius: 50%; animation: floatUp 3s forwards; }
-        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-800px) scale(0); opacity: 0; } }
-
-        #enemy-army { position: absolute; left: 0; bottom: 0; width: 100%; height: 0px; background: linear-gradient(to top, var(--enemy-glow), transparent); z-index: 8; transition: height 0.1s linear; border-top: 8px solid #ff0000; }
-        #moses-group { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); z-index: 25; display: flex; flex-direction: column; align-items: center; transition: all 0.5s ease-out; }
-        .word { position: absolute; color: white; font-weight: bold; font-size: 26px; text-shadow: 0 5px 15px #000; z-index: 100; padding: 12px 24px; background: rgba(0,0,0,0.85); border-radius: 50px; border: 3px solid var(--accent); white-space: nowrap; transform: translateX(-50%); }
-
-        #game-modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(30px); color: white; text-align: center; }
-        .modal-content { background: #111; padding: 50px; border-radius: 50px; border: 4px solid var(--accent); }
+        /* 시네마틱 효과 */
+        #victory-layer { position: fixed; inset: 0; background: gold; opacity: 0; pointer-events: none; z-index: 9000; transition: opacity 0.5s; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: 900; color: white; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
-<div id="white-out"></div>
-<div id="victory-text">HALLELUJAH!</div>
+    <a href="index.html" class="home-btn">🏠 홈으로</a>
 
-<div id="setup-screen">
-    <div class="setup-box">
-        <h1 style="color:var(--accent); font-size: 45px; margin:0 0 10px 0;">출애굽 여정 v3.2</h1>
-        <div class="diff-group" onclick="initGame('easy')">
-            <div style="font-size:26px; font-weight:800; color:#81c784;">Easy 평화로운 시작</div>
-            <div style="font-size:15px; opacity:0.85;">군대가 천천히 출발하며 백성들을 배려합니다.</div>
-        </div>
-        <div class="diff-group" onclick="initGame('normal')">
-            <div style="font-size:26px; font-weight:800; color:#64b5f6;">Normal 표준 여정</div>
-            <div style="font-size:15px; opacity:0.85;">표준적인 추격 속도입니다. 지혜롭게 전진하세요.</div>
-        </div>
-        <div class="diff-group" onclick="initGame('hard')">
-            <div style="font-size:26px; font-weight:800; color:#e57373;">Hard 고난의 시험</div>
-            <div style="font-size:15px; opacity:0.85;">가나안 도착 후 군대의 분노가 극에 달합니다.</div>
+    <div id="setup-screen">
+        <div class="diff-box">
+            <h1>Exodus: Red Sea</h1>
+            <button class="diff-btn" onclick="startGame(0.4)">Easy 평화로운 시작</button>
+            <button class="diff-btn" onclick="startGame(0.7)">Normal 표준 여정</button>
+            <button class="diff-btn" onclick="startGame(1.0)">Hard 고난의 시험</button>
         </div>
     </div>
-</div>
 
-<div id="game-container">
-    <div id="goal"><div style="font-size: 55px;">🏛️</div><div style="font-size: 26px; font-weight: bold;">거룩한 가나안 성전</div></div>
-    <div id="path"></div>
-    <div class="sea-wall wall-left" id="w-left"><div class="wall-content" style="width:100%;height:100%;background:linear-gradient(to bottom, var(--sea-top), var(--sea-deep));"></div></div>
-    <div class="sea-wall wall-right" id="w-right"><div class="wall-content" style="width:100%;height:100%;background:linear-gradient(to bottom, var(--sea-top), var(--sea-deep));"></div></div>
-    <div id="enemy-army"></div>
-    <div id="moses-group">
-        <div id="moses-main" style="font-size:85px; filter: drop-shadow(0 0 25px gold);">🧔🏾‍♂️</div>
-        <div style="font-size:32px">👨‍👩‍👧‍👦 👶</div>
+    <div id="victory-layer">HALLELUJAH!</div>
+
+    <div id="game-container">
+        <div id="goal">🌿 가나안 성전 🏛️</div>
+        <div id="path"></div>
+        <div class="sea-wall wall-left" id="w-left"></div>
+        <div class="sea-wall wall-right" id="w-right"></div>
+        <div id="moses">🧔🏾‍♂️</div>
+        <div id="input-container">
+            <input type="text" id="word-input" placeholder="타이핑 하세요!" autocomplete="off">
+        </div>
     </div>
-    <div id="input-container" style="position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:200; width:85%; max-width:400px;">
-        <input type="text" id="word-input" style="width:100%; padding:22px; border-radius:50px; border:5px solid var(--accent); font-size:24px; text-align:center; outline:none;" placeholder="말씀을 입력하세요!" autocomplete="off">
-    </div>
-</div>
 
-<div id="game-modal">
-    <div class="modal-content">
-        <h2 id="modal-title" style="font-size: 40px; color: var(--accent); margin:0;"></h2>
-        <p id="modal-desc" style="font-size: 22px; margin-top: 25px;"></p>
-        <button style="margin-top:40px; padding:18px 50px; border-radius:40px; border:none; background:var(--accent); font-weight:bold; font-size:24px; cursor:pointer;" onclick="location.reload()">다시 시작하기</button>
-    </div>
-</div>
+    <script>
+        const words = ["모세", "기적", "믿음", "소망", "사랑", "홍해", "이스라엘", "만나", "십계명", "여호수아"];
+        let activeWords = [], mosesPos = 100, pathWidth = 400, isGameOver = false, speedMult = 1;
+        const input = document.getElementById('word-input');
 
-<script>
-    const bibleWords = ["모세", "아브라함", "다윗", "솔로몬", "이스라엘", "여호수아", "홍해", "만나", "십계명", "믿음", "소망", "사랑", "베드로", "바울", "요한"];
-    let activeWords = [], pathWidth = 450, enemyHeight = -50, mosesPos = 120, isArrived = false, isGameOver = false, audioCtx = null;
-    let difficulty = 'normal', enemySpeed = 0.5;
-
-    const inputField = document.getElementById('word-input');
-    const container = document.getElementById('game-container');
-    const modal = document.getElementById('game-modal');
-
-    function initGame(level) {
-        difficulty = level;
-        document.getElementById('setup-screen').style.display = 'none';
-        container.style.display = 'block';
-        if(difficulty === 'easy') { enemyHeight = -150; enemySpeed = 0.35; }
-        else if(difficulty === 'hard') { enemySpeed = 0.65; }
-        updateWalls(); spawnWord(); update(); inputField.focus();
-    }
-
-    // [핵심 개선] 성전 입성 시네마틱 효과
-    function playDivineMiracle() {
-        const whiteOut = document.getElementById('white-out');
-        const victoryText = document.getElementById('victory-text');
-        const goal = document.getElementById('goal');
-        
-        // 1. 화이트아웃 섬광
-        whiteOut.style.opacity = '0.8';
-        setTimeout(() => whiteOut.style.opacity = '0', 500);
-
-        // 2. 배경 및 성전 변화
-        container.style.background = 'radial-gradient(circle at center, #fff9c4, #ffd54f)';
-        goal.style.boxShadow = '0 0 200px 100px gold';
-        goal.style.background = 'gold';
-
-        // 3. 할렐루야 텍스트 등장
-        setTimeout(() => {
-            victoryText.style.opacity = '1';
-            victoryText.style.transform = 'translate(-50%, -50%) scale(1.5)';
-        }, 300);
-
-        // 4. 대량의 입자 폭발
-        for(let i=0; i<100; i++) {
-            setTimeout(() => {
-                const p = document.createElement('div');
-                p.className = 'bless-particle';
-                p.style.width = (Math.random() * 15 + 5) + 'px';
-                p.style.height = p.style.width;
-                p.style.background = `hsl(${Math.random()*50 + 40}, 100%, 70%)`;
-                p.style.left = Math.random() * 100 + 'vw';
-                p.style.top = '100vh';
-                p.style.boxShadow = '0 0 20px white';
-                document.body.appendChild(p);
-                setTimeout(() => p.remove(), 3000);
-            }, i * 20);
+        function startGame(speed) {
+            speedMult = speed;
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            input.focus();
+            spawnWord();
+            update();
         }
-    }
 
-    function triggerEnd(isWin, title, desc) {
-        if(isGameOver) return;
-        isGameOver = true;
-        inputField.blur();
-        if(isWin) {
-            playSound(440, 'sine'); playSound(554, 'sine'); playSound(659, 'sine');
-            playDivineMiracle(); // 강화된 연출 실행
-        } else {
-            playSound(55, 'sawtooth');
-            container.style.animation = 'shake 0.5s';
+        function spawnWord() {
+            if(isGameOver) return;
+            const text = words[Math.floor(Math.random()*words.length)];
+            const el = document.createElement('div');
+            el.className = 'word'; el.innerText = text;
+            el.style.left = (Math.random() * 60 + 20) + 'vw';
+            el.style.top = '-50px';
+            document.getElementById('game-container').appendChild(el);
+            activeWords.push({ el, text, top: -50, speed: (Math.random() + 1) * speedMult });
+            setTimeout(spawnWord, 2000 / speedMult);
         }
-        setTimeout(() => {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-desc').innerText = desc;
-            modal.style.display = 'flex';
-        }, 2500); // 연출을 충분히 즐긴 후 모달 표시
-    }
 
-    function playSound(freq, type) {
-        try {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.2);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 1.2);
-        } catch(e) {}
-    }
+        function update() {
+            if(isGameOver) return;
+            activeWords.forEach((w, i) => {
+                w.top += w.speed;
+                w.el.style.top = w.top + 'px';
+                if(w.top > window.innerHeight) {
+                    w.el.remove(); activeWords.splice(i, 1);
+                }
+            });
+            requestAnimationFrame(update);
+        }
 
-    function update() {
-        if(isGameOver) return;
-        enemyHeight += enemySpeed;
-        document.getElementById('enemy-army').style.height = Math.max(0, enemyHeight) + 'px';
-        activeWords.forEach((word, i) => {
-            word.top += word.speed; word.el.style.top = word.top + 'px';
-            if (word.top > window.innerHeight) { word.el.remove(); activeWords.splice(i, 1); }
+        input.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') {
+                const val = input.value.trim();
+                const idx = activeWords.findIndex(w => w.text === val);
+                if(idx !== -1) {
+                    mosesPos += 50;
+                    document.getElementById('moses').style.bottom = mosesPos + 'px';
+                    activeWords[idx].el.remove();
+                    activeWords.splice(idx, 1);
+                    if(mosesPos > window.innerHeight - 200) winGame();
+                } else {
+                    pathWidth = Math.max(50, pathWidth - 40);
+                    updatePath();
+                }
+                input.value = '';
+            }
         });
-        if (!isArrived && mosesPos > window.innerHeight - 260) {
-            isArrived = true;
-            document.getElementById('moses-group').style.bottom = (window.innerHeight - 60) + 'px';
-            document.getElementById('moses-main').innerText = "👑";
-            if(difficulty === 'hard') enemySpeed += 0.5;
+
+        function updatePath() {
+            document.getElementById('path').style.width = pathWidth + 'px';
+            document.getElementById('w-left').style.marginRight = (pathWidth/2) + 'px';
+            document.getElementById('w-right').style.marginLeft = (pathWidth/2) + 'px';
+            if(pathWidth <= 50) alert("바다가 닫혔습니다!");
         }
-        if (isArrived && pathWidth <= 45) { triggerEnd(true, "🕊️ 약속의 땅 입성", "모든 백성이 기적 속에서 가나안 성전에 입성했습니다!"); return; }
-        if (enemyHeight > window.innerHeight - 70) { triggerEnd(false, "🔥 가나안 함락", "바다가 닫히지 않아 성지가 침범당했습니다."); return; }
-        if (!isArrived && enemyHeight > mosesPos - 60) { triggerEnd(false, "🌊 여정 중단", "군대에게 백성들이 잡히고 말았습니다."); return; }
-        requestAnimationFrame(update);
-    }
 
-    function updateWalls() {
-        document.getElementById('path').style.width = pathWidth + 'px';
-        document.getElementById('w-left').style.marginRight = (pathWidth / 2) + 'px';
-        document.getElementById('w-right').style.marginLeft = (pathWidth / 2) + 'px';
-    }
-
-    inputField.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const val = inputField.value.trim();
-            const index = activeWords.findIndex(w => w.text === val);
-            if (index !== -1) {
-                if (isArrived) pathWidth = Math.max(0, pathWidth - 125);
-                else { mosesPos += 90; document.getElementById('moses-group').style.bottom = mosesPos + 'px'; enemyHeight -= 70; }
-                activeWords[index].el.remove(); activeWords.splice(index, 1);
-                playSound(350, 'square');
-            } else { pathWidth = Math.max(20, pathWidth - 110); playSound(90, 'sawtooth'); }
-            inputField.value = ''; updateWalls();
+        function winGame() {
+            isGameOver = true;
+            const vic = document.getElementById('victory-layer');
+            vic.style.opacity = '1';
+            setTimeout(() => location.reload(), 3000);
         }
-    });
-
-    function spawnWord() {
-        if(isGameOver) return;
-        const wordText = bibleWords[Math.floor(Math.random()*bibleWords.length)];
-        const el = document.createElement('div');
-        el.className = 'word'; el.innerText = wordText;
-        el.style.left = (Math.floor(Math.random() * 70) + 15) + "vw";
-        el.style.top = "-80px";
-        container.appendChild(el);
-        activeWords.push({ el, text: wordText, top: -80, speed: Math.random()*0.6 + 1.0 });
-        setTimeout(spawnWord, 1600);
-    }
-</script>
+    </script>
 </body>
 </html>
