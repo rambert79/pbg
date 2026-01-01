@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animated Badge Reversi v20</title>
+    <title>Staggered Flip Badge Reversi v22</title>
     <style>
         :root {
             --board-color: #2e7d32;
@@ -35,43 +35,61 @@
             overflow: hidden; transition: background 0.4s;
         }
 
+        /* 3D Flip 애니메이션 */
+        .cell {
+            background-color: var(--board-color);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; perspective: 1000px;
+        }
+
+        .badge-container {
+            width: 90%; height: 90%;
+            position: relative;
+            /* transform 시간을 약간 늘리고 부드럽게 조절 */
+            transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        /* flipped 클래스가 붙으면 180도 회전 */
+        .badge-container.flipped { transform: rotateY(180deg); }
+
+        .badge-face {
+            position: absolute;
+            width: 100%; height: 100%;
+            backface-visibility: hidden;
+            display: flex; align-items: center; justify-content: center;
+            font-size: var(--badge-size);
+            border-radius: 50%;
+        }
+
+        .badge-back { transform: rotateY(180deg); }
+
+        /* 애니메이션 및 컨트롤 스타일 */
         @keyframes pulse {
-            0% { transform: scale(1.1); filter: drop-shadow(0 0 5px var(--accent)); }
-            50% { transform: scale(1.35); filter: drop-shadow(0 0 20px var(--accent)); }
-            100% { transform: scale(1.1); filter: drop-shadow(0 0 5px var(--accent)); }
+            0%, 100% { transform: scale(1.1); filter: drop-shadow(0 0 5px var(--accent)); }
+            50% { transform: scale(1.3); filter: drop-shadow(0 0 15px var(--accent)); }
         }
 
         .focus-card { font-size: 40px; transition: 0.4s; opacity: 0.1; transform: scale(0.8); }
-        .focus-card.active { opacity: 1; animation: pulse 1.5s infinite ease-in-out; z-index: 10; }
+        .focus-card.active { opacity: 1; animation: pulse 1.5s infinite ease-in-out; }
 
         .top-controls { display: flex; gap: 12px; margin-bottom: 15px; }
-        .btn-ui { 
-            padding: 8px 16px; border-radius: 15px; border: 1px solid rgba(128,128,128,0.3); 
-            background: var(--card-bg); color: var(--text-color); cursor: pointer; 
-            font-weight: bold; font-size: 13px; transition: 0.2s;
-        }
-        .btn-ui:hover:not(:disabled) { background: var(--accent); color: white; border-color: var(--accent); }
-        .btn-ui:disabled { opacity: 0.1; cursor: not-allowed; }
+        .btn-ui { padding: 8px 16px; border-radius: 15px; border: 1px solid rgba(128,128,128,0.3); background: var(--card-bg); color: var(--text-color); cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+        .btn-ui:hover:not(:disabled) { background: var(--accent); color: white; }
 
-        #game-message {
-            position: fixed; top: 15%; background: var(--accent); color: white;
-            padding: 10px 30px; border-radius: 30px; font-weight: bold;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transform: translateY(-100px); opacity: 0; transition: 0.5s; z-index: 150;
-        }
+        #game-message { position: fixed; top: 15%; background: var(--accent); color: white; padding: 10px 30px; border-radius: 30px; font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transform: translateY(-100px); opacity: 0; transition: 0.5s; z-index: 150; }
         #game-message.show { transform: translateY(0); opacity: 1; }
 
         #top-indicator { width: 250px; height: 4px; background: rgba(128,128,128,0.2); border-radius: 2px; margin-bottom: 15px; position: relative; overflow: hidden; }
         #progress-bar { position: absolute; width: 50%; height: 100%; background: var(--accent); transition: left 0.4s ease; }
 
-        #focus-card-container { display: flex; align-items: center; gap: 40px; margin-bottom: 10px; }
+        #focus-card-container { display: flex; align-items: center; gap: 30px; margin-bottom: 10px; }
 
         #board-container { padding: 8px; border-radius: 15px; transition: 0.6s ease; background: var(--card-bg); }
         body.p1-turn #board-container { box-shadow: 0 0 40px var(--p1-neon); }
         body.p2-turn #board-container { box-shadow: 0 0 40px var(--p2-neon); }
 
         #board { display: grid; grid-template-columns: repeat(8, var(--cell-size)); grid-template-rows: repeat(8, var(--cell-size)); gap: 1.5px; background-color: rgba(128,128,128,0.2); border-radius: 8px; }
-        .cell { background-color: var(--board-color); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: var(--badge-size); }
 
         #score-panel { display: flex; gap: 40px; margin-top: 15px; font-size: 20px; font-weight: 800; }
 
@@ -81,8 +99,6 @@
 
         #setup-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: flex; align-items: center; justify-content: center; z-index: 300; }
         .setup-container { background: var(--setup-bg); padding: 30px; border-radius: 28px; text-align: center; width: 85%; max-width: 420px; border: 1px solid rgba(128,128,128,0.3); }
-        
-        /* [신규] 플레이어 라벨 스타일 */
         .player-label { font-size: 12px; font-weight: 900; opacity: 0.6; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
@@ -91,18 +107,14 @@
     <div id="setup-screen">
         <div class="setup-container">
             <h2 style="color:var(--accent); margin-top:0; letter-spacing: 2px;">BADGE REVERSI</h2>
-            
             <div style="margin-top: 20px;">
                 <div class="player-label" style="color: var(--p1-neon);">Player 1 Badge</div>
                 <div id="p1-emojis" style="margin-bottom: 20px; display: flex; justify-content: center; gap: 8px;"></div>
-                
                 <div class="player-label" style="color: var(--p2-neon);">Player 2 Badge</div>
                 <div id="p2-emojis" style="margin-bottom: 20px; display: flex; justify-content: center; gap: 8px;"></div>
-                
                 <div class="player-label">Board Theme</div>
                 <div id="theme-options" style="display: flex; justify-content: center; gap: 10px;"></div>
             </div>
-
             <button class="btn-ui" style="background:var(--accent); color:white; margin-top:30px; width:100%; height: 50px; font-size: 16px;" onclick="startGame()">BATTLE START</button>
         </div>
     </div>
@@ -124,6 +136,7 @@
             <button class="btn-ui" style="background: var(--accent); color:white; width: 100%; font-size: 16px;" onclick="closeResultModal()">Play Again</button>
         </div>
     </div>
+
     <div class="top-controls">
         <button class="btn-ui" onclick="location.reload()">⚙️ Settings</button>
         <button class="btn-ui" onclick="openRestartModal()">🔄 Restart</button>
@@ -184,37 +197,60 @@
             initGame();
         }
 
-        function showMessage(msg) {
-            const el = document.getElementById('game-message');
-            el.innerText = msg;
-            el.classList.add('show');
-            setTimeout(() => el.classList.remove('show'), 2000);
-        }
-
-        function openRestartModal() { document.getElementById('restart-modal').style.display = 'flex'; }
-        function confirmRestart(shouldRestart) {
-            document.getElementById('restart-modal').style.display = 'none';
-            if(shouldRestart) initGame();
-        }
-
         function initGame() {
             board = Array(8).fill().map(() => Array(8).fill(0));
             board[3][3] = 2; board[3][4] = 1; board[4][3] = 1; board[4][4] = 2;
             currentPlayer = 1; renderBoard(); updateUI();
         }
 
-        function renderBoard() {
+        // [핵심 개선] 렌더링 시 뒤집기 애니메이션을 명시적으로 컨트롤
+        function renderBoard(flips = []) {
             const boardEl = document.getElementById('board');
             boardEl.innerHTML = '';
             let s1 = 0, s2 = 0;
+
             for (let r = 0; r < 8; r++) {
                 for (let c = 0; c < 8; c++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
                     cell.onclick = () => handleMove(r, c);
+                    
                     if (board[r][c] !== 0) {
-                        cell.innerText = board[r][c] === 1 ? p1Badge : p2Badge;
-                        board[r][c] === 1 ? s1++ : s2++;
+                        const container = document.createElement('div');
+                        container.className = 'badge-container';
+                        
+                        const front = document.createElement('div');
+                        front.className = 'badge-face badge-front';
+                        const back = document.createElement('div');
+                        back.className = 'badge-face badge-back';
+
+                        // 뒤집힐 놈들인지 체크하여 앞뒤 설정
+                        const isFlipping = flips.some(f => f[0] === r && f[1] === c);
+                        
+                        if (board[r][c] === 1) {
+                            front.innerText = isFlipping ? p2Badge : p1Badge;
+                            back.innerText = p1Badge;
+                            s1++;
+                        } else {
+                            front.innerText = isFlipping ? p1Badge : p2Badge;
+                            back.innerText = p2Badge;
+                            s2++;
+                        }
+
+                        container.appendChild(front);
+                        container.appendChild(back);
+                        cell.appendChild(container);
+
+                        // 시차를 두고 뒤집기 시작
+                        if (isFlipping) {
+                            const delay = flips.findIndex(f => f[0] === r && f[1] === c) * 100;
+                            setTimeout(() => {
+                                container.classList.add('flipped');
+                            }, delay);
+                        } else {
+                            // 이미 배치된 돌은 뒤집힌 상태로 유지 (v21 로직 보완)
+                            // 새롭게 배치된 돌(isFlipping은 아니지만 방금 둔 돌)은 그냥 바로 보여줌
+                        }
                     }
                     boardEl.appendChild(cell);
                 }
@@ -227,32 +263,26 @@
             if (board[r][c] !== 0) return;
             const flips = getFlips(r, c, currentPlayer);
             if (flips.length === 0) return;
+
             board[r][c] = currentPlayer;
             flips.forEach(([fr, fc]) => board[fr][fc] = currentPlayer);
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
-            renderBoard(); updateUI();
-            checkGameState();
-        }
-
-        function handlePass() {
-            const badge = currentPlayer === 1 ? p1Badge : p2Badge;
-            showMessage(`${badge} Passed Turn!`);
+            
+            // 뒤집힐 좌표들을 renderBoard에 전달
+            renderBoard(flips); 
+            
             currentPlayer = currentPlayer === 1 ? 2 : 1;
             updateUI();
             checkGameState();
         }
 
+        // 나머지 로직 동일
+        function handlePass() { currentPlayer = currentPlayer === 1 ? 2 : 1; updateUI(); checkGameState(); }
         function checkGameState() {
-            const currentCanMove = canMove(currentPlayer);
-            const opponentCanMove = canMove(currentPlayer === 1 ? 2 : 1);
-            document.getElementById('pass-btn').disabled = currentCanMove;
-            if (!currentCanMove && opponentCanMove) {
-                const badge = currentPlayer === 1 ? p1Badge : p2Badge;
-                showMessage(`${badge} has no moves!`);
-            }
-            if (!currentCanMove && !opponentCanMove) showFinalModal();
+            const cMove = canMove(currentPlayer);
+            const oMove = canMove(currentPlayer === 1 ? 2 : 1);
+            document.getElementById('pass-btn').disabled = cMove;
+            if (!cMove && !oMove) showFinalModal();
         }
-
         function getFlips(r, c, p) {
             const opp = p === 1 ? 2 : 1;
             const dirs = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
@@ -264,24 +294,20 @@
             });
             return all;
         }
-
         function canMove(p) {
             for (let r = 0; r < 8; r++)
                 for (let c = 0; c < 8; c++)
                     if (board[r][c] === 0 && getFlips(r, c, p).length > 0) return true;
             return false;
         }
-
         function updateUI() {
             document.body.className = currentPlayer === 1 ? 'p1-turn' : 'p2-turn';
             document.getElementById('progress-bar').style.left = currentPlayer === 1 ? '0%' : '50%';
             document.getElementById('p1-card').className = 'focus-card' + (currentPlayer === 1 ? ' active' : '');
             document.getElementById('p2-card').className = 'focus-card' + (currentPlayer === 2 ? ' active' : '');
-            document.getElementById('pass-btn').disabled = canMove(currentPlayer);
             const activeColor = currentPlayer === 1 ? 'var(--p1-neon)' : 'var(--p2-neon)';
             document.documentElement.style.setProperty('--accent', activeColor);
         }
-
         function showFinalModal() {
             const s1 = board.flat().filter(x => x === 1).length;
             const s2 = board.flat().filter(x => x === 2).length;
@@ -292,11 +318,9 @@
             else { winnerIcon.innerText = "🤝"; resultText.innerText = `DRAW! (${s1}:${s2})`; }
             document.getElementById('result-modal').style.display = 'flex';
         }
-
-        function closeResultModal() {
-            document.getElementById('result-modal').style.display = 'none';
-            initGame();
-        }
+        function openRestartModal() { document.getElementById('restart-modal').style.display = 'flex'; }
+        function confirmRestart(res) { document.getElementById('restart-modal').style.display='none'; if(res) initGame(); }
+        function closeResultModal() { document.getElementById('result-modal').style.display = 'none'; initGame(); }
 
         refreshBadges(); refreshThemes();
     </script>
