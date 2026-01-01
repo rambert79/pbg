@@ -3,137 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staggered Flip Badge Reversi v22</title>
+    <title>Pure Logic Badge Reversi v29</title>
     <style>
         :root {
-            --board-color: #2e7d32;
-            --accent: #4caf50;
-            --p1-neon: #4caf50;
-            --p2-neon: #2196f3;
-            --board-size: 75vmin; 
-            --cell-size: calc(var(--board-size) / 8.5);
-            --badge-size: calc(var(--cell-size) * 0.7);
-            --bg-color: #f8f8f8;
-            --text-color: #1a1a1a;
-            --card-bg: rgba(0, 0, 0, 0.05);
-            --setup-bg: rgba(255, 255, 255, 0.98);
+            --board-color: #2e7d32; --accent: #4caf50; --p1-neon: #4caf50; --p2-neon: #2196f3;
+            --board-size: 75vmin; --cell-size: calc(var(--board-size) / 8.5); --badge-size: calc(var(--cell-size) * 0.7);
+            --bg-color: #f8f8f8; --text-color: #1a1a1a; --setup-bg: #ffffff; --card-bg: rgba(0,0,0,0.05);
         }
-
         @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #0a0a0a;
-                --text-color: #ffffff;
-                --card-bg: rgba(255, 255, 255, 0.05);
-                --setup-bg: rgba(10, 10, 10, 0.98);
-            }
+            :root { --bg-color: #0a0a0a; --text-color: #ffffff; --setup-bg: #1a1a1a; --card-bg: rgba(255,255,255,0.08); }
         }
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; }
 
-        body {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-color); color: var(--text-color); 
-            overflow: hidden; transition: background 0.4s;
-        }
+        /* 설정 화면 */
+        #setup-screen { position: fixed; inset: 0; background: var(--bg-color); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .setup-container { background: var(--setup-bg); padding: 30px; border-radius: 28px; text-align: center; width: 90%; max-width: 400px; border: 1px solid rgba(128,128,128,0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+        .player-box { background: var(--card-bg); padding: 15px; border-radius: 18px; margin-bottom: 12px; border-left: 5px solid transparent; }
+        .player-box.p1 { border-left-color: var(--p1-neon); }
+        .player-box.p2 { border-left-color: var(--p2-neon); }
+        .player-label { font-size: 11px; font-weight: 900; text-align: left; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .emoji-grid { display: flex; justify-content: center; gap: 8px; }
+        .emoji-item { font-size: 24px; cursor: pointer; padding: 6px; border-radius: 12px; border: 2px solid rgba(128,128,128,0.2); background: var(--setup-bg); }
+        .emoji-item.selected { border-color: var(--accent); background: rgba(76, 175, 80, 0.1); transform: scale(1.1); }
+        .theme-grid { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
+        .theme-dot { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .theme-dot.selected { border-color: var(--text-color); transform: scale(1.1); }
 
-        /* 3D Flip 애니메이션 */
-        .cell {
-            background-color: var(--board-color);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; perspective: 1000px;
-        }
-
-        .badge-container {
-            width: 90%; height: 90%;
-            position: relative;
-            /* transform 시간을 약간 늘리고 부드럽게 조절 */
-            transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform-style: preserve-3d;
-        }
-
-        /* flipped 클래스가 붙으면 180도 회전 */
-        .badge-container.flipped { transform: rotateY(180deg); }
-
-        .badge-face {
-            position: absolute;
-            width: 100%; height: 100%;
-            backface-visibility: hidden;
-            display: flex; align-items: center; justify-content: center;
-            font-size: var(--badge-size);
-            border-radius: 50%;
-        }
-
-        .badge-back { transform: rotateY(180deg); }
-
-        /* 애니메이션 및 컨트롤 스타일 */
-        @keyframes pulse {
-            0%, 100% { transform: scale(1.1); filter: drop-shadow(0 0 5px var(--accent)); }
-            50% { transform: scale(1.3); filter: drop-shadow(0 0 15px var(--accent)); }
-        }
-
-        .focus-card { font-size: 40px; transition: 0.4s; opacity: 0.1; transform: scale(0.8); }
-        .focus-card.active { opacity: 1; animation: pulse 1.5s infinite ease-in-out; }
-
-        .top-controls { display: flex; gap: 12px; margin-bottom: 15px; }
-        .btn-ui { padding: 8px 16px; border-radius: 15px; border: 1px solid rgba(128,128,128,0.3); background: var(--card-bg); color: var(--text-color); cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
-        .btn-ui:hover:not(:disabled) { background: var(--accent); color: white; }
-
-        #game-message { position: fixed; top: 15%; background: var(--accent); color: white; padding: 10px 30px; border-radius: 30px; font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transform: translateY(-100px); opacity: 0; transition: 0.5s; z-index: 150; }
-        #game-message.show { transform: translateY(0); opacity: 1; }
-
-        #top-indicator { width: 250px; height: 4px; background: rgba(128,128,128,0.2); border-radius: 2px; margin-bottom: 15px; position: relative; overflow: hidden; }
-        #progress-bar { position: absolute; width: 50%; height: 100%; background: var(--accent); transition: left 0.4s ease; }
-
-        #focus-card-container { display: flex; align-items: center; gap: 30px; margin-bottom: 10px; }
-
-        #board-container { padding: 8px; border-radius: 15px; transition: 0.6s ease; background: var(--card-bg); }
+        /* 게임 보드 및 배지 */
+        #board-container { padding: 8px; border-radius: 15px; background: var(--card-bg); transition: 0.6s; }
         body.p1-turn #board-container { box-shadow: 0 0 40px var(--p1-neon); }
         body.p2-turn #board-container { box-shadow: 0 0 40px var(--p2-neon); }
-
         #board { display: grid; grid-template-columns: repeat(8, var(--cell-size)); grid-template-rows: repeat(8, var(--cell-size)); gap: 1.5px; background-color: rgba(128,128,128,0.2); border-radius: 8px; }
+        .cell { background-color: var(--board-color); display: flex; align-items: center; justify-content: center; cursor: pointer; perspective: 1000px; }
+        .badge-container { width: 90%; height: 90%; position: relative; transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }
+        .badge-container.flipped { transform: rotateY(180deg); }
+        .badge-face { position: absolute; inset: 0; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; font-size: var(--badge-size); border-radius: 50%; }
+        .badge-back { transform: rotateY(180deg); }
+        .focus-card { font-size: 40px; transition: 0.4s; opacity: 0.1; }
+        .focus-card.active { opacity: 1; animation: pulse 1.5s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { transform: scale(1.1); } 50% { transform: scale(1.3); } }
 
+        /* UI 및 모달 */
+        .top-controls { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-ui { padding: 8px 16px; border-radius: 15px; border: 1px solid rgba(128,128,128,0.3); background: var(--card-bg); color: var(--text-color); cursor: pointer; font-weight: bold; font-size: 13px; }
+        #top-indicator { width: 200px; height: 4px; background: rgba(128,128,128,0.2); margin-bottom: 15px; position: relative; overflow: hidden; border-radius: 2px; }
+        #progress-bar { position: absolute; width: 50%; height: 100%; background: var(--accent); transition: left 0.4s ease; }
         #score-panel { display: flex; gap: 40px; margin-top: 15px; font-size: 20px; font-weight: 800; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--setup-bg); color: var(--text-color); padding: 30px; border-radius: 25px; text-align: center; border: 2px solid var(--accent); max-width: 320px; width: 85%; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--setup-bg); color: var(--text-color); padding: 30px; border-radius: 25px; text-align: center; border: 2px solid var(--accent); animation: modalPop 0.3s ease; max-width: 320px; width: 85%; }
-        @keyframes modalPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        #setup-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: flex; align-items: center; justify-content: center; z-index: 300; }
-        .setup-container { background: var(--setup-bg); padding: 30px; border-radius: 28px; text-align: center; width: 85%; max-width: 420px; border: 1px solid rgba(128,128,128,0.3); }
-        .player-label { font-size: 12px; font-weight: 900; opacity: 0.6; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        /* [신규] 순수 CSS 폭죽 조각 */
+        .confetti { position: fixed; width: 10px; height: 10px; z-index: 3000; pointer-events: none; }
     </style>
 </head>
-<body class="p1-turn">
-    <div id="game-message">Message</div>
+<body>
+
     <div id="setup-screen">
         <div class="setup-container">
-            <h2 style="color:var(--accent); margin-top:0; letter-spacing: 2px;">BADGE REVERSI</h2>
-            <div style="margin-top: 20px;">
-                <div class="player-label" style="color: var(--p1-neon);">Player 1 Badge</div>
-                <div id="p1-emojis" style="margin-bottom: 20px; display: flex; justify-content: center; gap: 8px;"></div>
-                <div class="player-label" style="color: var(--p2-neon);">Player 2 Badge</div>
-                <div id="p2-emojis" style="margin-bottom: 20px; display: flex; justify-content: center; gap: 8px;"></div>
-                <div class="player-label">Board Theme</div>
-                <div id="theme-options" style="display: flex; justify-content: center; gap: 10px;"></div>
-            </div>
-            <button class="btn-ui" style="background:var(--accent); color:white; margin-top:30px; width:100%; height: 50px; font-size: 16px;" onclick="startGame()">BATTLE START</button>
-        </div>
-    </div>
-
-    <div id="restart-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div style="font-size: 40px; margin-bottom: 10px;">🔄</div>
-            <h3 style="margin-top: 0;">Restart Game?</h3>
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
-                <button class="btn-ui" style="flex:1" onclick="confirmRestart(true)">Restart</button>
-                <button class="btn-ui" style="flex:1; background: transparent;" onclick="confirmRestart(false)">Cancel</button>
-            </div>
-        </div>
-    </div>
-    <div id="result-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div id="modal-winner-icon" style="font-size: 60px;">🏆</div>
-            <div id="modal-result-text" style="font-size: 22px; margin: 15px 0; font-weight:bold;">WINNER!</div>
-            <button class="btn-ui" style="background: var(--accent); color:white; width: 100%; font-size: 16px;" onclick="closeResultModal()">Play Again</button>
+            <h2 style="color:var(--accent); margin:0 0 20px 0;">BADGE REVERSI</h2>
+            <div class="player-box p1"><div class="player-label" style="color:var(--p1-neon)">Player 1</div><div id="p1-emojis" class="emoji-grid"></div></div>
+            <div class="player-box p2"><div class="player-label" style="color:var(--p2-neon)">Player 2</div><div id="p2-emojis" class="emoji-grid"></div></div>
+            <div><div class="player-label" style="text-align:center">Theme</div><div id="theme-options" class="theme-grid"></div></div>
+            <button class="btn-ui" style="background:var(--accent); color:white; margin-top:25px; width:100%; height:50px; font-size:16px;" onclick="startGame()">BATTLE START</button>
         </div>
     </div>
 
@@ -143,116 +74,107 @@
         <button id="pass-btn" class="btn-ui" onclick="handlePass()" disabled>⏭️ Pass</button>
     </div>
     <div id="top-indicator"><div id="progress-bar"></div></div>
-    <div id="focus-card-container">
+    <div style="display:flex; gap:30px; margin-bottom:10px; align-items:center;">
         <div id="p1-card" class="focus-card active"></div>
         <div style="font-size: 14px; opacity: 0.5; font-weight: 900;">VS</div>
         <div id="p2-card" class="focus-card"></div>
     </div>
     <div id="board-container"><div id="board"></div></div>
-    <div id="score-panel">
-        <div id="p1-score-ui"></div>
-        <div id="p2-score-ui"></div>
-    </div>
+    <div id="score-panel"><div id="p1-score-ui"></div><div id="p2-score-ui"></div></div>
+
+    <div id="restart-modal" class="modal-overlay"><div class="modal-content"><h3>Restart?</h3><div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-ui" style="flex:1" onclick="confirmRestart(true)">Yes</button><button class="btn-ui" style="flex:1" onclick="confirmRestart(false)">No</button></div></div></div>
+    <div id="result-modal" class="modal-overlay"><div class="modal-content"><div id="modal-winner-icon" style="font-size:60px;">🏆</div><div id="modal-result-text" style="font-size:20px; margin:15px 0;">WINNER!</div><button class="btn-ui" style="background:var(--accent); color:white; width:100%" onclick="location.reload()">New Game</button></div></div>
 
     <script>
         const emojiPool = ['⚫','⚪','🐻','🐰','🌝','🌚','🔥','❄️','🍔','🍟','🎮','⭐','🍀','🍄','🐯','🦊','🥑','🚀','💎','👻','🍎','🎈','🐧','🎸','🍕','🍦','🦁','🐨','🌈','🌊'];
         const colorPool = ['#2e7d32','#1565c0','#c62828','#6a1b9a','#ef6c00','#00838f','#37474f','#283593'];
-        let board = [], currentPlayer = 1;
-        let p1Badge, p2Badge;
+        let board = [], currentPlayer = 1, p1Badge, p2Badge;
+        let audioCtx = null;
 
-        function refreshBadges() {
-            [1, 2].forEach(p => {
-                const container = document.getElementById(`p${p}-emojis`);
-                const randoms = [...emojiPool].sort(() => 0.5 - Math.random()).slice(0, 5);
-                container.innerHTML = randoms.map((e, i) => `<span style="font-size:25px; cursor:pointer; padding:6px; border:2px solid ${i===0?'var(--accent)':'rgba(128,128,128,0.3)'}; border-radius:10px;" onclick="selectBadge(${p}, '${e}', this)">${e}</span>`).join('');
-                p === 1 ? p1Badge = randoms[0] : p2Badge = randoms[0];
-            });
+        // [해결] 외부 라이브러리 없이 직접 만든 폭죽 시스템
+        function launchConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            for(let i=0; i<100; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                el.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.top = '-10px';
+                document.body.appendChild(el);
+
+                const duration = Math.random() * 3 + 2;
+                el.animate([
+                    { transform: `translate3d(0, 0, 0) rotate(0deg)`, opacity: 1 },
+                    { transform: `translate3d(${(Math.random()-0.5)*200}px, 100vh, 0) rotate(${Math.random()*360}deg)`, opacity: 0 }
+                ], { duration: duration * 1000, easing: 'cubic-bezier(0, .9, .6, 1)' });
+                setTimeout(() => el.remove(), duration * 1000);
+            }
         }
 
-        function refreshThemes() {
-            const container = document.getElementById('theme-options');
-            const randoms = [...colorPool].sort(() => 0.5 - Math.random()).slice(0, 5);
-            container.innerHTML = randoms.map((c, i) => `<div style="width:25px; height:25px; border-radius:50%; background:${c}; cursor:pointer; border:2px solid ${i===0?'var(--accent)':'transparent'};" onclick="selectTheme('${c}', this)"></div>`).join('');
-            selectTheme(randoms[0], container.firstChild);
+        function initSetup() {
+            const p1C = document.getElementById('p1-emojis'), p2C = document.getElementById('p2-emojis'), tC = document.getElementById('theme-options');
+            const p1R = [...emojiPool].sort(() => 0.5 - Math.random()).slice(0, 5);
+            const p2R = [...emojiPool].sort(() => 0.5 - Math.random()).slice(0, 5);
+            p1C.innerHTML = p1R.map((e, i) => `<span class="emoji-item ${i===0?'selected':''}" onclick="selectBadge(1,'${e}',this)">${e}</span>`).join('');
+            p2C.innerHTML = p2R.map((e, i) => `<span class="emoji-item ${i===0?'selected':''}" onclick="selectBadge(2,'${e}',this)">${e}</span>`).join('');
+            p1Badge = p1R[0]; p2Badge = p2R[0];
+            const tR = [...colorPool].sort(() => 0.5 - Math.random()).slice(0, 5);
+            tC.innerHTML = tR.map((c, i) => `<div class="theme-dot ${i===0?'selected':''}" style="background:${c}" onclick="selectTheme('${c}',this)"></div>`).join('');
+            selectTheme(tR[0], tC.firstChild);
         }
 
-        function selectTheme(color, el) {
-            document.querySelectorAll('#theme-options div').forEach(d => d.style.borderColor = 'transparent');
-            el.style.borderColor = 'var(--accent)';
-            document.documentElement.style.setProperty('--board-color', color);
-            document.documentElement.style.setProperty('--p1-neon', color);
-            document.documentElement.style.setProperty('--p2-neon', color === '#1565c0' ? '#4caf50' : '#2196f3');
+        function selectBadge(p, e, el) {
+            document.querySelectorAll(`#p${p}-emojis .emoji-item`).forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected'); p === 1 ? p1Badge = e : p2Badge = e;
         }
 
-        function selectBadge(p, emoji, el) {
-            document.querySelectorAll(`#p${p}-emojis span`).forEach(s => s.style.borderColor = 'rgba(128,128,128,0.3)');
-            el.style.borderColor = 'var(--accent)';
-            p === 1 ? p1Badge = emoji : p2Badge = emoji;
+        function selectTheme(c, el) {
+            document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('selected'));
+            el.classList.add('selected');
+            document.documentElement.style.setProperty('--board-color', c);
+            document.documentElement.style.setProperty('--p1-neon', c);
+            document.documentElement.style.setProperty('--p2-neon', c === '#1565c0' ? '#4caf50' : '#2196f3');
+        }
+
+        function playSound(type) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                osc.type = type === 'pop' ? 'sine' : 'triangle';
+                osc.frequency.setValueAtTime(type === 'pop' ? 500 : 800, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e) {}
         }
 
         function startGame() {
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('p1-card').innerText = p1Badge;
             document.getElementById('p2-card').innerText = p2Badge;
-            initGame();
-        }
-
-        function initGame() {
             board = Array(8).fill().map(() => Array(8).fill(0));
             board[3][3] = 2; board[3][4] = 1; board[4][3] = 1; board[4][4] = 2;
-            currentPlayer = 1; renderBoard(); updateUI();
+            renderBoard(); updateUI();
         }
 
-        // [핵심 개선] 렌더링 시 뒤집기 애니메이션을 명시적으로 컨트롤
         function renderBoard(flips = []) {
-            const boardEl = document.getElementById('board');
-            boardEl.innerHTML = '';
+            const b = document.getElementById('board'); b.innerHTML = '';
             let s1 = 0, s2 = 0;
-
             for (let r = 0; r < 8; r++) {
                 for (let c = 0; c < 8; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.onclick = () => handleMove(r, c);
-                    
+                    const cell = document.createElement('div'); cell.className = 'cell'; cell.onclick = () => handleMove(r, c);
                     if (board[r][c] !== 0) {
-                        const container = document.createElement('div');
-                        container.className = 'badge-container';
-                        
-                        const front = document.createElement('div');
-                        front.className = 'badge-face badge-front';
-                        const back = document.createElement('div');
-                        back.className = 'badge-face badge-back';
-
-                        // 뒤집힐 놈들인지 체크하여 앞뒤 설정
-                        const isFlipping = flips.some(f => f[0] === r && f[1] === c);
-                        
-                        if (board[r][c] === 1) {
-                            front.innerText = isFlipping ? p2Badge : p1Badge;
-                            back.innerText = p1Badge;
-                            s1++;
-                        } else {
-                            front.innerText = isFlipping ? p1Badge : p2Badge;
-                            back.innerText = p2Badge;
-                            s2++;
-                        }
-
-                        container.appendChild(front);
-                        container.appendChild(back);
-                        cell.appendChild(container);
-
-                        // 시차를 두고 뒤집기 시작
-                        if (isFlipping) {
-                            const delay = flips.findIndex(f => f[0] === r && f[1] === c) * 100;
-                            setTimeout(() => {
-                                container.classList.add('flipped');
-                            }, delay);
-                        } else {
-                            // 이미 배치된 돌은 뒤집힌 상태로 유지 (v21 로직 보완)
-                            // 새롭게 배치된 돌(isFlipping은 아니지만 방금 둔 돌)은 그냥 바로 보여줌
-                        }
+                        const cont = document.createElement('div'); cont.className = 'badge-container';
+                        const f = document.createElement('div'); f.className = 'badge-face';
+                        const bk = document.createElement('div'); bk.className = 'badge-face badge-back';
+                        const isF = flips.some(x => x[0] === r && x[1] === c);
+                        if (board[r][c] === 1) { f.innerText = isF?p2Badge:p1Badge; bk.innerText = p1Badge; s1++; }
+                        else { f.innerText = isF?p1Badge:p2Badge; bk.innerText = p2Badge; s2++; }
+                        cont.appendChild(f); cont.appendChild(bk); cell.appendChild(cont);
+                        if (isF) setTimeout(() => { cont.classList.add('flipped'); playSound('pop'); }, flips.findIndex(x => x[0]===r && x[1]===c) * 80);
                     }
-                    boardEl.appendChild(cell);
+                    b.appendChild(cell);
                 }
             }
             document.getElementById('p1-score-ui').innerText = `${p1Badge} ${s1}`;
@@ -261,28 +183,14 @@
 
         function handleMove(r, c) {
             if (board[r][c] !== 0) return;
-            const flips = getFlips(r, c, currentPlayer);
-            if (flips.length === 0) return;
-
-            board[r][c] = currentPlayer;
-            flips.forEach(([fr, fc]) => board[fr][fc] = currentPlayer);
-            
-            // 뒤집힐 좌표들을 renderBoard에 전달
-            renderBoard(flips); 
-            
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
-            updateUI();
-            checkGameState();
+            const f = getFlips(r, c, currentPlayer);
+            if (f.length === 0) return;
+            playSound('pop'); board[r][c] = currentPlayer;
+            f.forEach(x => board[x[0]][x[1]] = currentPlayer);
+            renderBoard(f); currentPlayer = currentPlayer === 1 ? 2 : 1;
+            updateUI(); checkEnd();
         }
 
-        // 나머지 로직 동일
-        function handlePass() { currentPlayer = currentPlayer === 1 ? 2 : 1; updateUI(); checkGameState(); }
-        function checkGameState() {
-            const cMove = canMove(currentPlayer);
-            const oMove = canMove(currentPlayer === 1 ? 2 : 1);
-            document.getElementById('pass-btn').disabled = cMove;
-            if (!cMove && !oMove) showFinalModal();
-        }
         function getFlips(r, c, p) {
             const opp = p === 1 ? 2 : 1;
             const dirs = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
@@ -294,35 +202,35 @@
             });
             return all;
         }
+
         function canMove(p) {
-            for (let r = 0; r < 8; r++)
-                for (let c = 0; c < 8; c++)
-                    if (board[r][c] === 0 && getFlips(r, c, p).length > 0) return true;
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (board[r][c] === 0 && getFlips(r, c, p).length > 0) return true;
             return false;
         }
+
         function updateUI() {
             document.body.className = currentPlayer === 1 ? 'p1-turn' : 'p2-turn';
             document.getElementById('progress-bar').style.left = currentPlayer === 1 ? '0%' : '50%';
             document.getElementById('p1-card').className = 'focus-card' + (currentPlayer === 1 ? ' active' : '');
             document.getElementById('p2-card').className = 'focus-card' + (currentPlayer === 2 ? ' active' : '');
-            const activeColor = currentPlayer === 1 ? 'var(--p1-neon)' : 'var(--p2-neon)';
-            document.documentElement.style.setProperty('--accent', activeColor);
+            document.getElementById('pass-btn').disabled = canMove(currentPlayer);
         }
-        function showFinalModal() {
-            const s1 = board.flat().filter(x => x === 1).length;
-            const s2 = board.flat().filter(x => x === 2).length;
-            const winnerIcon = document.getElementById('modal-winner-icon');
-            const resultText = document.getElementById('modal-result-text');
-            if (s1 > s2) { winnerIcon.innerText = p1Badge; resultText.innerText = `P1 WINS! (${s1}:${s2})`; }
-            else if (s2 > s1) { winnerIcon.innerText = p2Badge; resultText.innerText = `P2 WINS! (${s2}:${s1})`; }
-            else { winnerIcon.innerText = "🤝"; resultText.innerText = `DRAW! (${s1}:${s2})`; }
-            document.getElementById('result-modal').style.display = 'flex';
-        }
-        function openRestartModal() { document.getElementById('restart-modal').style.display = 'flex'; }
-        function confirmRestart(res) { document.getElementById('restart-modal').style.display='none'; if(res) initGame(); }
-        function closeResultModal() { document.getElementById('result-modal').style.display = 'none'; initGame(); }
 
-        refreshBadges(); refreshThemes();
+        function checkEnd() {
+            if (!canMove(1) && !canMove(2)) {
+                const s1 = board.flat().filter(x => x === 1).length;
+                const s2 = board.flat().filter(x => x === 2).length;
+                document.getElementById('modal-result-text').innerText = s1 > s2 ? `P1 WIN (${s1}:${s2})` : `P2 WIN (${s2}:${s1})`;
+                document.getElementById('result-modal').style.display = 'flex';
+                launchConfetti(); playSound('win');
+            }
+        }
+
+        function openRestartModal() { document.getElementById('restart-modal').style.display = 'flex'; }
+        function confirmRestart(res) { document.getElementById('restart-modal').style.display = 'none'; if(res) startGame(); }
+        function handlePass() { currentPlayer = currentPlayer === 1 ? 2 : 1; updateUI(); checkEnd(); }
+
+        initSetup();
     </script>
 </body>
 </html>
