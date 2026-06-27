@@ -170,18 +170,15 @@ body {
 
 /* BACK FACE */
 .card-back {
-  position: absolute;
+  /* position: absolute는 .card-face에서 이미 설정됨 */
   background: linear-gradient(145deg, #b8d9f0 0%, #87c3e8 40%, #a8d4f0 100%);
-  border: 4px solid transparent;
-  background-clip: padding-box;
+  border: 4px solid #f0c040;
   box-shadow:
-    0 0 0 4px #fff,
-    0 0 0 6px #f0c040,
+    inset 0 0 0 3px #fff,
     0 6px 16px rgba(0,0,0,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
   overflow: hidden;
 }
 .card-back::before {
@@ -244,7 +241,6 @@ body {
   z-index: 2;
   line-height: 1;
 }
-
 /* FRONT FACE */
 .card-front {
   background: var(--card-front-bg);
