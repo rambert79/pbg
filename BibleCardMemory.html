@@ -170,26 +170,77 @@ body {
 
 /* BACK FACE */
 .card-back {
-  background: #fef08a;
-  border: 4px solid #fef08a;
-  box-shadow: inset 0 0 0 4px #fff, 0 4px 10px rgba(0,0,0,0.15);
-  background-image: radial-gradient(circle, #ffffff 0%, #e0f2fe 100%);
+  background: linear-gradient(145deg, #b8d9f0 0%, #87c3e8 40%, #a8d4f0 100%);
+  border: 4px solid transparent;
+  background-clip: padding-box;
+  box-shadow:
+    0 0 0 4px #fff,
+    0 0 0 6px #f0c040,
+    0 6px 16px rgba(0,0,0,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.card-back-pattern { display: none; }
-.card-number {
-  font-size: calc(var(--card-size) * 0.28);
-  font-weight: 900;
-  color: #d97706;
-  font-family: 'Impact', 'Arial Black', sans-serif;
-  text-shadow:
-    -2px -2px 0 #fff, 2px -2px 0 #fff,
-    -2px  2px 0 #fff, 2px  2px 0 #fff,
-    0 4px 6px rgba(180, 83, 9, 0.3);
   position: relative;
+  overflow: hidden;
+}
+.card-back::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0%, transparent 60%),
+    repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(255,255,255,0.12) 18px, rgba(255,255,255,0.12) 20px),
+    repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(255,255,255,0.12) 18px, rgba(255,255,255,0.12) 20px);
+  pointer-events: none;
+  z-index: 0;
+}
+.card-back-pattern {
+  display: flex !important;
+  position: absolute;
+  width: 72%; height: 72%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f5f0e0 0%, #ddeeff 55%, transparent 75%);
+  border: 2px solid rgba(100,160,220,0.4);
+  box-shadow: 0 0 0 4px rgba(100,160,220,0.15);
+  align-items: center;
+  justify-content: center;
   z-index: 1;
+  overflow: visible;
+}
+.card-back-pattern::before {
+  content: '';
+  position: absolute;
+  width: 80%; height: 80%;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(100,160,220,0.35);
+}
+.card-back-corner {
+  position: absolute;
+  font-size: calc(var(--card-size) * 0.11);
+  line-height: 1;
+  z-index: 3;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+.card-back-corner.tl { top: 5%; left: 5%; }
+.card-back-corner.tr { top: 5%; right: 5%; }
+.card-back-corner.bl { bottom: 5%; left: 5%; }
+.card-back-corner.br { bottom: 5%; right: 5%; }
+.card-number {
+  font-size: calc(var(--card-size) * 0.38);
+  font-weight: 900;
+  font-family: 'Arial Black', 'Arial Bold', 'Impact', sans-serif;
+  background: linear-gradient(180deg, #ffe57a 0%, #f5c842 40%, #e0a020 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter:
+    drop-shadow(-2px -2px 0 #4a90d9)
+    drop-shadow(2px -2px 0 #4a90d9)
+    drop-shadow(-2px 2px 0 #4a90d9)
+    drop-shadow(2px 2px 0 #4a90d9)
+    drop-shadow(0 3px 5px rgba(30,80,160,0.4));
+  position: relative;
+  z-index: 2;
   line-height: 1;
 }
 
@@ -469,6 +520,10 @@ function buildBoard(cfg) {
     el.innerHTML = `
       <div class="card-inner">
         <div class="card-face card-back">
+          <span class="card-back-corner tl">⛪</span>
+          <span class="card-back-corner tr">⛪</span>
+          <span class="card-back-corner bl">⛪</span>
+          <span class="card-back-corner br">⛪</span>
           <div class="card-back-pattern"></div>
           <div class="card-number">${idx + 1}</div>
         </div>
