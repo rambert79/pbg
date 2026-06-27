@@ -1,138 +1,72 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PBG - Play Board Game</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --accent-reversi: #4caf50;
-            --accent-exodus: #ffd700;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Pretendard', system-ui, -apple-system, sans-serif;
-            background: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-            letter-spacing: -1px;
-        }
-
-        .container {
-            display: flex;
-            gap: 2rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .game-card {
-            background: var(--card-bg);
-            width: 300px;
-            padding: 2rem;
-            border-radius: 2rem;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 2px solid rgba(255, 255, 255, 0.05);
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .game-card:hover {
-            transform: translateY(-15px);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .game-card.reversi:hover { box-shadow: 0 0 30px var(--accent-reversi); }
-        .game-card.exodus:hover { box-shadow: 0 0 30px var(--accent-exodus); }
-
-        .icon {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
-            transition: transform 0.3s ease;
-        }
-
-        .game-card:hover .icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-        }
-
-        .desc {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            text-align: center;
-            line-height: 1.5;
-        }
-
-        .start-badge {
-            margin-top: 1.5rem;
-            padding: 0.6rem 1.5rem;
-            border-radius: 1rem;
-            font-weight: 900;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-        }
-
-        .reversi .start-badge { background: var(--accent-reversi); color: #fff; }
-        .exodus .start-badge { background: var(--accent-exodus); color: #000; }
-
-        footer {
-            margin-top: 4rem;
-            font-size: 0.8rem;
-            opacity: 0.4;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBG - Play Board Game</title>
+<style>
+:root {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-main: #f8fafc;
+  --accent-reversi: #4caf50;
+  --accent-exodus: #ffd700;
+  --accent-bible: #a78bfa;
+}
+body {
+  margin: 0; padding: 0;
+  font-family: 'Pretendard', system-ui, -apple-system, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-main);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 100vh; overflow-x: hidden;
+}
+h1 { font-size: 2.5rem; margin-bottom: 3rem; text-shadow: 0 0 20px rgba(255,255,255,0.2); letter-spacing: -1px; }
+.container { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; padding: 1rem; }
+.game-card {
+  background: var(--card-bg); width: 300px; padding: 2rem; border-radius: 2rem;
+  text-decoration: none; color: inherit; display: flex; flex-direction: column;
+  align-items: center; transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  border: 2px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; cursor: pointer;
+}
+.game-card:hover { transform: translateY(-15px); border-color: rgba(255,255,255,0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+.game-card.reversi:hover { box-shadow: 0 0 30px var(--accent-reversi); }
+.game-card.exodus:hover { box-shadow: 0 0 30px var(--accent-exodus); }
+.game-card.bible:hover { box-shadow: 0 0 30px var(--accent-bible); }
+.icon { font-size: 5rem; margin-bottom: 1.5rem; transition: transform 0.3s ease; }
+.game-card:hover .icon { transform: scale(1.1) rotate(5deg); }
+.title { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+.desc { font-size: 0.9rem; opacity: 0.7; text-align: center; line-height: 1.5; }
+.start-badge { margin-top: 1.5rem; padding: 0.6rem 1.5rem; border-radius: 1rem; font-weight: 900; font-size: 0.8rem; text-transform: uppercase; }
+.reversi .start-badge { background: var(--accent-reversi); color: #fff; }
+.exodus .start-badge { background: var(--accent-exodus); color: #000; }
+.bible .start-badge { background: var(--accent-bible); color: #fff; }
+footer { margin-top: 4rem; font-size: 0.8rem; opacity: 0.4; }
+</style>
 </head>
 <body>
-
-    <h1>Play Board Game</h1>
-
-    <div class="container">
-        <a href="BadgeReversi.html" class="game-card reversi">
-            <div class="icon">🐻</div>
-            <div class="title">Badge Reversi</div>
-            <div class="desc">귀여운 배지들을 뒤집어 승리하세요!<br>순수 로직 보드게임 v29.1</div>
-            <div class="start-badge">Play Now</div>
-        </a>
-
-        <a href="ExodusRedsee.html" class="game-card exodus">
-            <div class="icon">🌊</div>
-            <div class="title">Exodus: Red Sea</div>
-            <div class="desc">말씀을 타이핑하여 바다를 가르세요!<br>Heavenly Glory v3.2</div>
-            <div class="start-badge">Start Journey</div>
-        </a>
-    </div>
-
-    <footer>© 2026 Web Game Development Hub</footer>
-
+<h1>Play Board Game</h1>
+<div class="container">
+  <a href="BadgeReversi.html" class="game-card reversi">
+    <div class="icon">🐻</div>
+    <div class="title">Badge Reversi</div>
+    <div class="desc">귀여운 배지들을 뒤집어 승리하세요!<br>순수 로직 보드게임 v29.1</div>
+    <div class="start-badge">Play Now</div>
+  </a>
+  <a href="ExodusRedsee.html" class="game-card exodus">
+    <div class="icon">🌊</div>
+    <div class="title">Exodus: Red Sea</div>
+    <div class="desc">말씀을 타이핑하여 바다를 가르세요!<br>Heavenly Glory v3.2</div>
+    <div class="start-badge">Start Journey</div>
+  </a>
+  <a href="BibleCardMemory.html" class="game-card bible">
+    <div class="icon">✝️</div>
+    <div class="title">Bible Card Memory</div>
+    <div class="desc">성경 인물 카드를 뒤집어 짝을 맞추세요!<br>주일학교 팀 대결 메모리 게임</div>
+    <div class="start-badge">Start Game</div>
+  </a>
+</div>
+<footer>© 2026 Web Game Development Hub</footer>
 </body>
 </html>
-
-
