@@ -19,6 +19,7 @@
   --cream: #fdf6e3;
   --sky: #87ceeb;
   --text: #1e293b;
+  --card-size: min(calc((100vw - 72px) / 6), calc((100vh - 172px) / 4));
 }
 body {
   font-family: 'Pretendard', system-ui, sans-serif;
@@ -139,16 +140,16 @@ body {
 
 /* ── GAME BOARD ── */
 #game-screen { gap: 0; padding: 0; }
-#board-wrap { width: 100%; max-width: 900px; padding: 1.2rem 1rem; }
+#board-wrap { width: 100%; max-width: 100%; padding: 0.8rem 1rem; }
 #board {
   display: grid;
-  gap: 0.6rem;
+  gap: 8px;
   justify-content: center;
 }
 
 /* ── CARDS ── */
 .card {
-  width: 150px; height: 150px;
+  width: var(--card-size); height: var(--card-size);
   cursor: pointer;
   perspective: 600px;
   position: relative;
@@ -182,7 +183,7 @@ body {
     radial-gradient(circle at 80% 80%, rgba(135,206,235,0.3) 0%, transparent 50%);
 }
 .card-number {
-  font-size: 3.8rem;
+  font-size: calc(var(--card-size) * 0.26);
   font-weight: 900;
   color: var(--gold);
   text-shadow:
@@ -215,15 +216,15 @@ body {
   padding: 0.4rem;
   background: linear-gradient(180deg, #fdf0d5 0%, #f5e6c8 100%);
 }
-.card-emoji { font-size: 3rem; line-height: 1; margin-bottom: 0.2rem; }
+.card-emoji { font-size: calc(var(--card-size) * 0.22); line-height: 1; margin-bottom: 0.2rem; }
 .card-church-bottom {
   background: linear-gradient(180deg, #8B5E3C 0%, #6b4226 100%);
   min-height: 36px; padding: 0.2rem 0.3rem;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
 }
-.card-name { font-size: 0.9rem; font-weight: 900; color: #fff8e1; line-height: 1.1; }
-.card-subtitle { font-size: 0.55rem; color: rgba(255,248,225,0.8); text-align: center; line-height: 1.2; }
+.card-name { font-size: calc(var(--card-size) * 0.1); font-weight: 900; color: #fff8e1; line-height: 1.1; }
+.card-subtitle { font-size: calc(var(--card-size) * 0.07); color: rgba(255,248,225,0.8); text-align: center; line-height: 1.2; }
 
 /* ── MODAL ── */
 #modal-overlay {
@@ -276,12 +277,8 @@ body {
 }
 
 @media (max-width: 600px) {
-  .card { width: 100px; height: 100px; }
-  .card-number { font-size: 2.6rem; }
-  .card-emoji { font-size: 2rem; }
-  .card-name { font-size: 0.75rem; }
-  .card-subtitle { font-size: 0.45rem; }
-  #board { gap: 0.4rem; }
+  :root { --card-size: min(calc((100vw - 40px) / 4), calc((100vh - 160px) / 5)); }
+  #board { gap: 6px; }
 }
 </style>
 </head>
