@@ -243,26 +243,18 @@ body {
 }
 /* FRONT FACE */
 .card-front {
-  background: var(--card-front-bg);
-  border: 3px solid #c8a96e;
-  transform: rotateY(180deg);
-  display: flex; flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  overflow: hidden;
+  padding: 0;
 }
-.card-front.matched-a { border-color: var(--team-a); background: #eff8ff; box-shadow: 0 0 12px var(--team-a); }
-.card-front.matched-b { border-color: var(--team-b); background: #fff5f5; box-shadow: 0 0 12px var(--team-b); }
+.card-matched-overlay { position: absolute; inset: 0; border-radius: 8px; pointer-events: none; border: 5px solid transparent; transition: border-color 0.3s; }
+.card-front.matched-a { border: 5px solid var(--team-a); box-shadow: 0 0 16px var(--team-a); }
+.card-front.matched-b { border: 5px solid var(--team-b); box-shadow: 0 0 16px var(--team-b); }
 .card-church-top {
   background: linear-gradient(180deg, #6b4226 0%, #8B5E3C 100%);
   height: 22px; display: flex; align-items: center; justify-content: center;
   font-size: 0.7rem; letter-spacing: 2px; color: rgba(255,255,255,0.8);
 }
-.card-illust {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 0.4rem;
-  background: linear-gradient(180deg, #fdf0d5 0%, #f5e6c8 100%);
-}
-.card-emoji { font-size: calc(var(--card-size) * 0.22); line-height: 1; margin-bottom: 0.2rem; }
+.card-front > .card-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 8px; }
 .card-church-bottom {
   background: linear-gradient(180deg, #8B5E3C 0%, #6b4226 100%);
   min-height: 36px; padding: 0.2rem 0.3rem;
@@ -419,18 +411,18 @@ body {
 <script>
 // ── DATA ──
 const ALL_CHARACTERS = [
-  { id:1,  name:'노아',     sub:'방주 & 약속의 무지개',       emoji:'🚢' },
-  { id:2,  name:'예수님',   sub:'인류의 구원자 & 사랑',        emoji:'✝️' },
-  { id:3,  name:'모세',     sub:'출애굽의 리더',               emoji:'🪄' },
-  { id:4,  name:'다윗',     sub:'믿음의 물매돌',               emoji:'🪃' },
-  { id:5,  name:'다니엘',   sub:'사자굴의 기적',               emoji:'🦁' },
-  { id:6,  name:'요셉',     sub:'꿈과 용서의 총리',            emoji:'👑' },
-  { id:7,  name:'요나',     sub:'물고기 뱃속의 예언자',        emoji:'🐋' },
-  { id:8,  name:'삼손',     sub:'나실인 & 천하장사',           emoji:'💪' },
-  { id:9,  name:'아브라함', sub:'믿음의 조상 & 많은 민족',     emoji:'⭐' },
-  { id:10, name:'에스더',   sub:'이스라엘의 왕비 & 지혜',      emoji:'👸' },
-  { id:11, name:'루디아',   sub:'빌립보의 성도 & 자줏옷 장사', emoji:'🟣' },
-  { id:12, name:'바울',     sub:'이방인의 사도 & 서신서 작가', emoji:'📜' },
+  { id:1,  name:'노아',     sub:'방주 & 약속의 무지개',       img:'noah.png' },
+  { id:2,  name:'예수님',   sub:'인류의 구원자 & 사랑',        img:'jesus.png' },
+  { id:3,  name:'모세',     sub:'출애굽의 리더',               img:'moses.png' },
+  { id:4,  name:'다윗',     sub:'믿음의 물매돌',               img:'david.png' },
+  { id:5,  name:'다니엘',   sub:'사자굴의 기적',               img:'daniel.png' },
+  { id:6,  name:'요셉',     sub:'꿈과 용서의 총리',            img:'joseph.png' },
+  { id:7,  name:'요나',     sub:'물고기 뱃속의 예언자',        img:'jonah.png' },
+  { id:8,  name:'삼손',     sub:'나실인 & 천하장사',           img:'samson.png' },
+  { id:9,  name:'아브라함', sub:'믿음의 조상 & 많은 민족',     img:'abraham.png' },
+  { id:10, name:'에스더',   sub:'이스라엘의 왕비 & 지혜',      img:'esther.png' },
+  { id:11, name:'루디아',   sub:'빌립보의 성도 & 자줏옷 장사', img:'lydia.png' },
+  { id:12, name:'바울',     sub:'이방인의 사도 & 서신서 작가', img:'paul.png' },
 ];
 
 const DIFF_CONFIG = {
@@ -525,16 +517,9 @@ function buildBoard(cfg) {
           <div class="card-number">${idx + 1}</div>
         </div>
         <div class="card-face card-front" id="front-${idx}">
-          <div class="card-church-top">✟ PBG ✟</div>
-          <div class="card-illust">
-            <div class="card-emoji">${card.emoji}</div>
-          </div>
-          <div class="card-church-bottom">
-            <div class="card-name">${card.name}</div>
-            <div class="card-subtitle">${card.sub}</div>
-          </div>
+          <img src="${card.img}" alt="${card.name}" class="card-img" loading="lazy">
+          <div class="card-matched-overlay" id="overlay-${idx}"></div>
         </div>
-      </div>
     `;
     el.addEventListener('click', () => onCardClick(idx, el));
     board.appendChild(el);
