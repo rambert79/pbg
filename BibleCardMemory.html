@@ -319,12 +319,24 @@ body.turn-b .team-side-bar.right { background: var(--team-b); box-shadow: 0 0 20
 .card-matched-overlay {
   position: absolute; inset: 0;
   border-radius: 0.8rem;
-  background: rgba(0,200,100,0.3);
   display: none;
   align-items: center; justify-content: center;
-  font-size: 2.5rem;
+  font-size: 2rem;
+  font-weight: 900;
+  pointer-events: none;
 }
-.card-matched-overlay.show { display: flex; }
+.card-matched-overlay.show-a {
+  display: flex;
+  background: rgba(59,130,246,0.35);
+  border: 4px solid var(--team-a);
+  color: #fff;
+}
+.card-matched-overlay.show-b {
+  display: flex;
+  background: rgba(239,68,68,0.35);
+  border: 4px solid var(--team-b);
+  color: #fff;
+}
 
 /* ── MODAL ── */
 #modal-overlay {
@@ -654,8 +666,12 @@ function onCardClick(idx, el) {
       setTimeout(() => {
         cards[a.idx].matched = true;
         cards[b.idx].matched = true;
-        document.getElementById('overlay-' + a.idx).classList.add('show');
-        document.getElementById('overlay-' + b.idx).classList.add('show');
+        const overlayClass = currentTurn === 'a' ? 'show-a' : 'show-b';
+        const overlayMark  = currentTurn === 'a' ? '🔵' : '🔴';
+        const ovA = document.getElementById('overlay-' + a.idx);
+        const ovB = document.getElementById('overlay-' + b.idx);
+        ovA.textContent = overlayMark; ovA.classList.add(overlayClass);
+        ovB.textContent = overlayMark; ovB.classList.add(overlayClass);
 
         if (currentTurn === 'a') {
           scoreA++;
