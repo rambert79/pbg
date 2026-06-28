@@ -83,28 +83,29 @@ body.turn-b #header { border-bottom-color: var(--team-b); background: rgba(40,10
   background: var(--surface);
   border: 2px solid rgba(255,255,255,0.1);
   border-radius: 1.5rem;
-  padding: 2rem;
-  width: 220px;
-  height: 220px;
+  padding: 1.5rem 1.5rem 2rem;
+  width: 280px;
+  height: 280px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
+  box-sizing: border-box;
 }
 .diff-card:hover { transform: translateY(-8px); }
 .diff-card.easy:hover { border-color: #4caf50; box-shadow: 0 0 20px #4caf5066; }
 .diff-card.mid:hover { border-color: #ffd700; box-shadow: 0 0 20px #ffd70066; }
 .diff-card.hard:hover { border-color: #ef4444; box-shadow: 0 0 20px #ef444466; }
-.diff-icon { font-size: 3.5rem; margin-bottom: 1rem; }
-.diff-name { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
-.diff-desc { font-size: 0.95rem; opacity: 0.8; line-height: 1.5; }
+.diff-icon { font-size: 4rem; }
+.diff-name { font-size: 1.8rem; font-weight: 800; }
+.diff-desc { font-size: 0.95rem; opacity: 0.8; line-height: 1.4; }
 .diff-badge {
-  display: inline-block; margin-top: 1rem;
-  padding: 0.4rem 1.2rem; border-radius: 1rem;
-  font-size: 0.85rem; font-weight: 700;
+  display: inline-block;
+  padding: 0.5rem 1.5rem; border-radius: 1rem;
+  font-size: 0.9rem; font-weight: 700;
 }
 .easy .diff-badge { background: #4caf50; color: #fff; }
 .mid .diff-badge { background: #ffd700; color: #000; }
