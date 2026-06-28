@@ -72,20 +72,20 @@ body.turn-b #header { border-bottom-color: var(--team-b); background: rgba(40,10
 #home-btn:hover { background: #64748b; color: #fff; }
 
 /* ── SCREENS ── */
-.screen { display: none; width: 100%; max-width: 900px; padding: 2rem 1rem; }
+.screen { display: none; width: 100%; max-width: 1100px; padding: 2rem 1rem; }
 .screen.active { display: flex; flex-direction: column; align-items: center; }
 
 /* ── MAIN SCREEN (difficulty) ── */
 #difficulty-title { font-size: 1.8rem; color: var(--gold); margin-bottom: 0.5rem; text-align: center; }
 #difficulty-sub { font-size: 0.95rem; opacity: 0.7; margin-bottom: 2rem; text-align: center; }
-.diff-cards { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+.diff-cards { display: flex; gap: 2rem; flex-wrap: nowrap; justify-content: center; align-items: stretch; }
 .diff-card {
   background: var(--surface);
   border: 2px solid rgba(255,255,255,0.1);
   border-radius: 1.5rem;
-  padding: 1.5rem 1.5rem 2rem;
-  width: 280px;
-  height: 280px;
+  padding: 2rem 1.5rem;
+  width: 320px;
+  height: 320px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
@@ -99,13 +99,13 @@ body.turn-b #header { border-bottom-color: var(--team-b); background: rgba(40,10
 .diff-card.easy:hover { border-color: #4caf50; box-shadow: 0 0 20px #4caf5066; }
 .diff-card.mid:hover { border-color: #ffd700; box-shadow: 0 0 20px #ffd70066; }
 .diff-card.hard:hover { border-color: #ef4444; box-shadow: 0 0 20px #ef444466; }
-.diff-icon { font-size: 4rem; }
-.diff-name { font-size: 1.8rem; font-weight: 800; }
-.diff-desc { font-size: 0.95rem; opacity: 0.8; line-height: 1.4; }
+.diff-icon { font-size: 5rem; }
+.diff-name { font-size: 2rem; font-weight: 800; }
+.diff-desc { font-size: 1rem; opacity: 0.8; line-height: 1.5; }
 .diff-badge {
   display: inline-block;
-  padding: 0.5rem 1.5rem; border-radius: 1rem;
-  font-size: 0.9rem; font-weight: 700;
+  padding: 0.6rem 1.8rem; border-radius: 1rem;
+  font-size: 1rem; font-weight: 700;
 }
 .easy .diff-badge { background: #4caf50; color: #fff; }
 .mid .diff-badge { background: #ffd700; color: #000; }
