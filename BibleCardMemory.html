@@ -6,7 +6,7 @@
 <title>Bible Card Memory - PBG</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-:root {h
+:root {
   --bg: #1a1a2e;
   --surface: #16213e;
   --primary: #0f3460;
@@ -15,7 +15,7 @@
   --team-a: #3b82f6;
   --team-b: #ef4444;
   --card-back-bg: #fffde7;
-  --card-front-bg: #fdf6e3;h
+  --card-front-bg: #fdf6e3;
   --cream: #fdf6e3;
   --sky: #87ceeb;
   --text: #1e293b;
@@ -29,6 +29,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: background 0.5s ease;
+}
+
+/* ── TEAM BG ── */
+body.turn-a {
+  background: linear-gradient(160deg, #0a1628 0%, #0d2050 40%, #1a1a2e 100%);
+}
+body.turn-b {
+  background: linear-gradient(160deg, #280a0a 0%, #501010 40%, #1a1a2e 100%);
 }
 
 /* ── HEADER ── */
@@ -40,14 +49,27 @@ body {
   align-items: center;
   justify-content: space-between;
   border-bottom: 2px solid var(--gold);
+  transition: border-color 0.5s, background 0.5s;
+  gap: 0.5rem;
 }
-#header h1 { font-size: 1.2rem; color: var(--gold); }
+body.turn-a #header { border-bottom-color: var(--team-a); background: rgba(10,22,40,0.95); }
+body.turn-b #header { border-bottom-color: var(--team-b); background: rgba(40,10,10,0.95); }
+#header h1 { font-size: 1.2rem; color: var(--gold); flex: 1; text-align: center; }
 #back-btn {
   background: none; border: 1px solid var(--gold);
   color: var(--gold); padding: 0.3rem 0.8rem;
   border-radius: 0.5rem; cursor: pointer; font-size: 0.85rem;
+  white-space: nowrap;
 }
 #back-btn:hover { background: var(--gold); color: #000; }
+#home-btn {
+  background: none; border: 1px solid #64748b;
+  color: #94a3b8; padding: 0.3rem 0.8rem;
+  border-radius: 0.5rem; cursor: pointer; font-size: 0.85rem;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;
+  white-space: nowrap;
+}
+#home-btn:hover { background: #64748b; color: #fff; }
 
 /* ── SCREENS ── */
 .screen { display: none; width: 100%; max-width: 900px; padding: 2rem 1rem; }
@@ -61,8 +83,8 @@ body {
   background: var(--surface);
   border: 2px solid rgba(255,255,255,0.1);
   border-radius: 1.5rem;
-  padding: 2rem 1.5rem;
-  width: 220px;
+  padding: 2.5rem 2rem;
+  width: 240px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
@@ -71,72 +93,105 @@ body {
 .diff-card.easy:hover { border-color: #4caf50; box-shadow: 0 0 20px #4caf5066; }
 .diff-card.mid:hover { border-color: #ffd700; box-shadow: 0 0 20px #ffd70066; }
 .diff-card.hard:hover { border-color: #ef4444; box-shadow: 0 0 20px #ef444466; }
-.diff-icon { font-size: 3rem; margin-bottom: 0.8rem; }
-.diff-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem; }
-.diff-desc { font-size: 0.8rem; opacity: 0.7; }
+.diff-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+.diff-name { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+.diff-desc { font-size: 0.95rem; opacity: 0.8; line-height: 1.5; }
 .diff-badge {
   display: inline-block; margin-top: 1rem;
-  padding: 0.3rem 1rem; border-radius: 1rem;
-  font-size: 0.75rem; font-weight: 700;
+  padding: 0.4rem 1.2rem; border-radius: 1rem;
+  font-size: 0.85rem; font-weight: 700;
 }
 .easy .diff-badge { background: #4caf50; color: #fff; }
 .mid .diff-badge { background: #ffd700; color: #000; }
 .hard .diff-badge { background: #ef4444; color: #fff; }
 
 /* ── TEAM INPUT SCREEN ── */
-#team-screen h2 { font-size: 1.5rem; color: var(--gold); margin-bottom: 1.5rem; }
-.team-inputs { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; margin-bottom: 2rem; }
+#team-screen h2 { font-size: 1.8rem; color: var(--gold); margin-bottom: 0.5rem; }
+#team-screen .team-subtitle { font-size: 1rem; opacity: 0.7; margin-bottom: 2rem; text-align: center; }
+.team-inputs { display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 2.5rem; }
 .team-input-box {
-  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.8rem;
+  background: var(--surface);
+  border-radius: 1.5rem;
+  padding: 2rem 2.5rem;
+  min-width: 210px;
 }
-.team-input-box label { font-size: 0.9rem; font-weight: 700; }
+.team-input-box.a { border: 3px solid var(--team-a); }
+.team-input-box.b { border: 3px solid var(--team-b); }
+.team-badge {
+  display: flex; align-items: center; justify-content: center;
+  width: 60px; height: 60px; border-radius: 50%;
+  font-size: 1.8rem; font-weight: 900;
+}
+.team-badge.a { background: rgba(59,130,246,0.15); color: var(--team-a); border: 3px solid var(--team-a); }
+.team-badge.b { background: rgba(239,68,68,0.15); color: var(--team-b); border: 3px solid var(--team-b); }
+.team-input-box label { font-size: 1.1rem; font-weight: 700; }
 .team-a-label { color: var(--team-a); }
 .team-b-label { color: var(--team-b); }
 .team-input-box input {
-  padding: 0.6rem 1rem; border-radius: 0.8rem;
+  padding: 0.8rem 1rem; border-radius: 0.8rem;
   border: 2px solid rgba(255,255,255,0.2);
-  background: var(--surface); color: #fff;
-  font-size: 1rem; text-align: center; width: 180px;
+  background: rgba(255,255,255,0.07); color: #fff;
+  font-size: 1.3rem; text-align: center; width: 200px;
 }
-.team-input-box.a input:focus { border-color: var(--team-a); outline: none; }
-.team-input-box.b input:focus { border-color: var(--team-b); outline: none; }
+.team-input-box.a input:focus { border-color: var(--team-a); outline: none; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+.team-input-box.b input:focus { border-color: var(--team-b); outline: none; box-shadow: 0 0 0 3px rgba(239,68,68,0.2); }
 #start-game-btn {
   background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-  color: #1a1a2e; border: none; padding: 0.8rem 2.5rem;
-  border-radius: 1rem; font-size: 1rem; font-weight: 900;
-  cursor: pointer; transition: transform 0.2s;
+  color: #1a1a2e; border: none; padding: 1.2rem 4rem;
+  border-radius: 1.5rem; font-size: 1.4rem; font-weight: 900;
+  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(226,185,111,0.4);
+  letter-spacing: 0.05em;
 }
-#start-game-btn:hover { transform: scale(1.05); }
+#start-game-btn:hover { transform: scale(1.07); box-shadow: 0 6px 28px rgba(226,185,111,0.6); }
 
 /* ── SCOREBOARD ── */
 #scoreboard {
-  width: 100%; max-width: 900px;
+  width: 100%; max-width: 100%;
   display: flex; gap: 1rem; padding: 0.8rem 1rem;
   justify-content: space-between; align-items: center;
   background: var(--surface);
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  transition: background 0.5s, border-color 0.5s;
+  position: sticky; top: 0; z-index: 10;
 }
+body.turn-a #scoreboard { background: rgba(10,22,40,0.97); border-bottom-color: var(--team-a); }
+body.turn-b #scoreboard { background: rgba(40,10,10,0.97); border-bottom-color: var(--team-b); }
 .score-box {
   flex: 1; display: flex; flex-direction: column; align-items: center;
   padding: 0.5rem 1rem; border-radius: 0.8rem;
   transition: all 0.3s;
 }
-.score-box.active-turn { transform: scale(1.05); }
+.score-box.active-turn { transform: scale(1.08); }
 .score-box.a { border: 2px solid var(--team-a); }
 .score-box.b { border: 2px solid var(--team-b); }
-.score-box.a.active-turn { background: rgba(59,130,246,0.15); box-shadow: 0 0 12px var(--team-a); }
-.score-box.b.active-turn { background: rgba(239,68,68,0.15); box-shadow: 0 0 12px var(--team-b); }
-.score-team-name { font-size: 0.85rem; font-weight: 700; }
+.score-box.a.active-turn { background: rgba(59,130,246,0.25); box-shadow: 0 0 20px rgba(59,130,246,0.5); border-width: 3px; }
+.score-box.b.active-turn { background: rgba(239,68,68,0.25); box-shadow: 0 0 20px rgba(239,68,68,0.5); border-width: 3px; }
+.score-team-name { font-size: 0.9rem; font-weight: 700; }
 .score-num { font-size: 2rem; font-weight: 900; }
 .score-box.a .score-team-name { color: var(--team-a); }
 .score-box.b .score-team-name { color: var(--team-b); }
 .score-box.a .score-num { color: var(--team-a); }
 .score-box.b .score-num { color: var(--team-b); }
 #turn-indicator {
-  font-size: 0.85rem; text-align: center; opacity: 0.9;
-  padding: 0.3rem 0.6rem; background: rgba(255,255,255,0.05);
-  border-radius: 0.5rem;
+  font-size: 1rem; text-align: center; font-weight: 700;
+  padding: 0.5rem 1rem; border-radius: 1rem;
+  transition: all 0.5s; min-width: 130px;
 }
+body.turn-a #turn-indicator { background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid var(--team-a); }
+body.turn-b #turn-indicator { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid var(--team-b); }
+
+/* ── SIDE BARS ── */
+.team-side-bar {
+  position: fixed; top: 0; width: 6px; height: 100%;
+  z-index: 5; opacity: 0; transition: opacity 0.5s;
+  pointer-events: none;
+}
+.team-side-bar.left { left: 0; }
+.team-side-bar.right { right: 0; }
+body.turn-a .team-side-bar.left { background: var(--team-a); box-shadow: 0 0 20px var(--team-a); opacity: 1; }
+body.turn-b .team-side-bar.right { background: var(--team-b); box-shadow: 0 0 20px var(--team-b); opacity: 1; }
 
 /* ── GAME BOARD ── */
 #game-screen { gap: 0; padding: 0; }
@@ -170,26 +225,25 @@ body {
 
 /* BACK FACE */
 .card-back {
-  
-  /* position: absolute는 .card-face에서 이미 설정됨 */
   background: linear-gradient(145deg, #b8d9f0 0%, #87c3e8 40%, #a8d4f0 100%);
   border: 4px solid #f0c040;
   box-shadow:
     inset 0 0 0 3px #fff,
     0 6px 16px rgba(0,0,0,0.25);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
   overflow: hidden;
 }
-.card-back::before {
-  content: '';
+.card-back-bg {
   position: absolute;
   inset: 0;
-  background-image:
+  background:
     radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0%, transparent 60%),
-    repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(255,255,255,0.12) 18px, rgba(255,255,255,0.12) 20px),
-    repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(255,255,255,0.12) 18px, rgba(255,255,255,0.12) 20px);
+    repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(255,255,255,0.12) 18px, rgba(255,255,255,0.12) 19px),
+    repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(255,255,255,0.12) 18px, rgba(255,255,255,0.12) 19px);
   pointer-events: none;
   z-index: 0;
 }
@@ -236,158 +290,156 @@ body {
     drop-shadow(-2px -2px 0 #4a90d9)
     drop-shadow(2px -2px 0 #4a90d9)
     drop-shadow(-2px 2px 0 #4a90d9)
-    drop-shadow(2px 2px 0 #4a90d9)
-    drop-shadow(0 3px 5px rgba(30,80,160,0.4));
-  position: relative;
+    drop-shadow(2px 2px 0 #4a90d9);
   z-index: 2;
-  line-height: 1;
+  position: relative;
 }
+
 /* FRONT FACE */
 .card-front {
   transform: rotateY(180deg);
-  overflow: hidden;
-  padding: 0;
+  background: var(--card-front-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(0,0,0,0.1);
 }
-.card-matched-overlay { position: absolute; inset: 0; border-radius: 8px; pointer-events: none; border: 5px solid transparent; transition: border-color 0.3s; }
-.card-front.matched-a { border: 5px solid var(--team-a); box-shadow: 0 0 16px var(--team-a); }
-.card-front.matched-b { border: 5px solid var(--team-b); box-shadow: 0 0 16px var(--team-b); }
-.card-church-top {
-  background: linear-gradient(180deg, #6b4226 0%, #8B5E3C 100%);
-  height: 22px; display: flex; align-items: center; justify-content: center;
-  font-size: 0.7rem; letter-spacing: 2px; color: rgba(255,255,255,0.8);
+.card-img {
+  width: 85%; height: 75%;
+  object-fit: contain;
+  border-radius: 0.5rem;
 }
-.card-front > .card-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 8px; }
-.card-church-bottom {
-  background: linear-gradient(180deg, #8B5E3C 0%, #6b4226 100%);
-  min-height: 36px; padding: 0.2rem 0.3rem;
-  display: flex; flex-direction: column;
+.card-matched-overlay {
+  position: absolute; inset: 0;
+  border-radius: 0.8rem;
+  background: rgba(0,200,100,0.3);
+  display: none;
   align-items: center; justify-content: center;
+  font-size: 2.5rem;
 }
-.card-name { font-size: calc(var(--card-size) * 0.1); font-weight: 900; color: #fff8e1; line-height: 1.1; }
-.card-subtitle { font-size: calc(var(--card-size) * 0.07); color: rgba(255,248,225,0.8); text-align: center; line-height: 1.2; }
+.card-matched-overlay.show { display: flex; }
 
 /* ── MODAL ── */
 #modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7); z-index: 100;
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 100;
   align-items: center; justify-content: center;
 }
 #modal-overlay.show { display: flex; }
-#modal {
+#modal-box {
   background: var(--surface);
   border: 2px solid var(--gold);
   border-radius: 2rem;
-  padding: 2.5rem 2rem;
+  padding: 3rem 2rem;
   text-align: center;
-  max-width: 420px; width: 90%;
-  animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  max-width: 400px; width: 90%;
 }
-@keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-#modal-trophy { font-size: 5rem; margin-bottom: 1rem; }
-#modal-title { font-size: 1.8rem; font-weight: 900; color: var(--gold); margin-bottom: 0.5rem; }
-#modal-winner { font-size: 1.2rem; margin-bottom: 1.5rem; }
-.score-summary { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; }
-.final-score {
-  padding: 0.8rem 1.5rem; border-radius: 1rem;
-  font-weight: 700; font-size: 1rem;
-}
-.final-score.a { background: rgba(59,130,246,0.2); border: 2px solid var(--team-a); color: var(--team-a); }
-.final-score.b { background: rgba(239,68,68,0.2); border: 2px solid var(--team-b); color: var(--team-b); }
-.modal-btns { display: flex; gap: 1rem; justify-content: center; }
+#modal-trophy { font-size: 4rem; margin-bottom: 1rem; }
+#modal-winner { font-size: 1.8rem; font-weight: 900; color: var(--gold); margin-bottom: 1.5rem; }
+.modal-scores { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; }
+.modal-score-item { text-align: center; padding: 0.8rem 1.5rem; border-radius: 1rem; }
+.modal-score-item.a { background: rgba(59,130,246,0.2); color: var(--team-a); border: 1px solid var(--team-a); }
+.modal-score-item.b { background: rgba(239,68,68,0.2); color: var(--team-b); border: 1px solid var(--team-b); }
+.modal-score-name { font-size: 0.85rem; font-weight: 700; }
+.modal-score-num { font-size: 2rem; font-weight: 900; }
+.modal-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 .modal-btn {
-  padding: 0.7rem 1.5rem; border-radius: 1rem;
-  font-size: 0.9rem; font-weight: 700; cursor: pointer; border: none;
-  transition: transform 0.2s;
+  padding: 0.7rem 1.5rem; border-radius: 1rem; border: none;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: transform 0.2s;
 }
 .modal-btn:hover { transform: scale(1.05); }
-#btn-replay { background: var(--gold); color: #1a1a2e; }
-#btn-home { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+.modal-btn.primary { background: var(--gold); color: #1a1a2e; }
+.modal-btn.secondary { background: var(--surface); color: #f1f5f9; border: 1px solid rgba(255,255,255,0.2); }
 
-/* confetti */
+/* ── CONFETTI ── */
 .confetti-piece {
   position: fixed;
   width: 10px; height: 10px;
   top: -10px;
-  animation: confettiFall linear forwards;
-  z-index: 99;
-  border-radius: 2px;
+  animation: confetti-fall 3s ease-in forwards;
+  z-index: 200;
 }
-@keyframes confettiFall {
-  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-}
-
-@media (max-width: 600px) {
-  :root { --card-size: min(calc((100vw - 40px) / 4), calc((100vh - 160px) / 5)); }
-  #board { gap: 6px; }
+@keyframes confetti-fall {
+  to { top: 110vh; transform: rotate(720deg); }
 }
 </style>
 </head>
 <body>
 
+<!-- 사이드 바 (팀 구별) -->
+<div class="team-side-bar left"></div>
+<div class="team-side-bar right"></div>
+
 <!-- HEADER -->
 <div id="header">
-  <button id="back-btn" onclick="goHome()">&#8592; 홈</button>
-  <h1>✝️ Bible Card Memory</h1>
-  <div style="width:60px"></div>
+  <a href="index.html" id="home-btn">🏠 메인허브</a>
+  <h1>✝ 성경 카드 기억 게임</h1>
+  <button id="back-btn" onclick="goBack()">◀ 뒤로</button>
 </div>
 
-<!-- SCOREBOARD (hidden until game) -->
+<!-- SCOREBOARD (hidden initially) -->
 <div id="scoreboard" style="display:none">
   <div class="score-box a" id="score-a">
-    <div class="score-team-name" id="name-a">믿음 팀</div>
-    <div class="score-num" id="pts-a">0</div>
+    <div class="score-team-name" id="name-a-score">A팀</div>
+    <div class="score-num" id="score-num-a">0</div>
   </div>
-  <div id="turn-indicator">게임 시작!</div>
+  <div id="turn-indicator">⏳ 준비 중</div>
   <div class="score-box b" id="score-b">
-    <div class="score-team-name" id="name-b">소망 팀</div>
-    <div class="score-num" id="pts-b">0</div>
+    <div class="score-team-name" id="name-b-score">B팀</div>
+    <div class="score-num" id="score-num-b">0</div>
   </div>
 </div>
 
-<!-- SCREEN: DIFFICULTY -->
-<div id="diff-screen" class="screen active">
-  <div id="difficulty-title">난이도를 선택하세요</div>
-  <div id="difficulty-sub">성경 인물들의 카드를 짝 맞춰 팀 대결!</div>
+<!-- SCREEN 1: DIFFICULTY -->
+<div class="screen active" id="difficulty-screen">
+  <div id="difficulty-title">🎴 난이도 선택</div>
+  <div id="difficulty-sub">팀과 함께 성경 인물을 맞춰보세요!</div>
   <div class="diff-cards">
-    <div class="diff-card easy" onclick="selectDiff('easy')">
-      <div class="diff-icon">🟢</div>
-      <div class="diff-name">목동 모드</div>
-      <div class="diff-desc">총 8장 (4쌍)<br>1×4 배치</div>
-      <div class="diff-badge">초급</div>
+    <div class="diff-card easy" onclick="selectDifficulty('easy')">
+      <div class="diff-icon">🐑</div>
+      <div class="diff-name">목동</div>
+      <div class="diff-desc">6쌍 (12장)<br>초보자에게 적합</div>
+      <div class="diff-badge">EASY</div>
     </div>
-    <div class="diff-card mid" onclick="selectDiff('mid')">
-      <div class="diff-icon">🟡</div>
-      <div class="diff-name">제자 모드</div>
-      <div class="diff-desc">총 16장 (8쌍)<br>4×4 그리드</div>
-      <div class="diff-badge">중급</div>
+    <div class="diff-card mid" onclick="selectDifficulty('mid')">
+      <div class="diff-icon">🕊</div>
+      <div class="diff-name">제자</div>
+      <div class="diff-desc">9쌍 (18장)<br>중급자에게 적합</div>
+      <div class="diff-badge">NORMAL</div>
     </div>
-    <div class="diff-card hard" onclick="selectDiff('hard')">
-      <div class="diff-icon">🔴</div>
-      <div class="diff-name">사도 모드</div>
-      <div class="diff-desc">총 24장 (12쌍)<br>6×4 그리드</div>
-      <div class="diff-badge">고급</div>
+    <div class="diff-card hard" onclick="selectDifficulty('hard')">
+      <div class="diff-icon">⚓</div>
+      <div class="diff-name">사도</div>
+      <div class="diff-desc">12쌍 (24장)<br>고급자에게 적합</div>
+      <div class="diff-badge">HARD</div>
     </div>
   </div>
 </div>
 
-<!-- SCREEN: TEAM INPUT -->
-<div id="team-screen" class="screen">
-  <h2>팀 이름을 입력하세요</h2>
+<!-- SCREEN 2: TEAM INPUT -->
+<div class="screen" id="team-screen">
+  <h2>👥 팀 이름 입력</h2>
+  <p class="team-subtitle">각 팀의 이름을 입력하고 게임을 시작하세요!</p>
   <div class="team-inputs">
     <div class="team-input-box a">
-      <label class="team-a-label">🔵 A팀 (Blue)</label>
-      <input id="input-a" type="text" value="믿음 팀" maxlength="10">
+      <div class="team-badge a">A</div>
+      <label class="team-a-label">🔵 A팀 이름</label>
+      <input type="text" id="team-a-input" placeholder="A팀" maxlength="10">
     </div>
     <div class="team-input-box b">
-      <label class="team-b-label">🔴 B팀 (Red)</label>
-      <input id="input-b" type="text" value="소망 팀" maxlength="10">
+      <div class="team-badge b">B</div>
+      <label class="team-b-label">🔴 B팀 이름</label>
+      <input type="text" id="team-b-input" placeholder="B팀" maxlength="10">
     </div>
   </div>
-  <button id="start-game-btn" onclick="startGame()">게임 시작! 🎮</button>
+  <button id="start-game-btn" onclick="startGame()">🎮 게임 시작!</button>
 </div>
 
-<!-- SCREEN: GAME -->
-<div id="game-screen" class="screen">
+<!-- SCREEN 3: GAME -->
+<div class="screen" id="game-screen">
   <div id="board-wrap">
     <div id="board"></div>
   </div>
@@ -395,17 +447,25 @@ body {
 
 <!-- MODAL -->
 <div id="modal-overlay">
-  <div id="modal">
+  <div id="modal-box">
     <div id="modal-trophy">🏆</div>
-    <div id="modal-title">게임 종료!</div>
     <div id="modal-winner"></div>
-    <div class="score-summary">
-      <div class="final-score a" id="final-a"></div>
-      <div class="final-score b" id="final-b"></div>
+    <div class="modal-scores">
+      <div class="modal-score-item a">
+        <div class="modal-score-name" id="final-a-name">A팀</div>
+        <div class="modal-score-num" id="final-a">0</div>
+        <div style="font-size:0.75rem;opacity:0.7">쌍</div>
+      </div>
+      <div class="modal-score-item b">
+        <div class="modal-score-name" id="final-b-name">B팀</div>
+        <div class="modal-score-num" id="final-b">0</div>
+        <div style="font-size:0.75rem;opacity:0.7">쌍</div>
+      </div>
     </div>
     <div class="modal-btns">
-      <button class="modal-btn" id="btn-replay" onclick="replayGame()">다시하기</button>
-      <button class="modal-btn" id="btn-home" onclick="goHome()">홈으로</button>
+      <button class="modal-btn primary" onclick="restartGame()">🔄 다시 하기</button>
+      <button class="modal-btn secondary" onclick="goToTitle()">📋 난이도 선택</button>
+      <button class="modal-btn secondary" onclick="location.href='index.html'">🏠 메인허브</button>
     </div>
   </div>
 </div>
@@ -413,80 +473,117 @@ body {
 <script>
 // ── DATA ──
 const ALL_CHARACTERS = [
-  { id:1,  name:'노아',     sub:'방주 & 약속의 무지개',       img:'noah.png' },
-  { id:2,  name:'예수님',   sub:'인류의 구원자 & 사랑',        img:'jesus.png' },
-  { id:3,  name:'모세',     sub:'출애굽의 리더',               img:'moses.png' },
-  { id:4,  name:'다윗',     sub:'믿음의 물매돌',               img:'david.png' },
-  { id:5,  name:'다니엘',   sub:'사자굴의 기적',               img:'daniel.png' },
-  { id:6,  name:'요셉',     sub:'꿈과 용서의 총리',            img:'joseph.png' },
-  { id:7,  name:'요나',     sub:'물고기 뱃속의 예언자',        img:'jonah.png' },
-  { id:8,  name:'삼손',     sub:'나실인 & 천하장사',           img:'samson.png' },
-  { id:9,  name:'아브라함', sub:'믿음의 조상 & 많은 민족',     img:'abraham.png' },
-  { id:10, name:'에스더',   sub:'이스라엘의 왕비 & 지혜',      img:'esther.png' },
-  { id:11, name:'루디아',   sub:'빌립보의 성도 & 자줏옷 장사', img:'lydia.png' },
-  { id:12, name:'바울',     sub:'이방인의 사도 & 서신서 작가', img:'paul.png' },
+  { name: '아브라함', img: 'abraham.png' },
+  { name: '다니엘',   img: 'daniel.png'  },
+  { name: '다윗',     img: 'david.png'   },
+  { name: '에스더',   img: 'esther.png'  },
+  { name: '예수님',   img: 'jesus.png'   },
+  { name: '요나',     img: 'jonah.png'   },
+  { name: '요셉',     img: 'joseph.png'  },
+  { name: '리디아',   img: 'lydia.png'   },
+  { name: '모세',     img: 'moses.png'   },
+  { name: '노아',     img: 'noah.png'    },
+  { name: '바울',     img: 'paul.png'    },
+  { name: '삼손',     img: 'samson.png'  },
 ];
 
-const DIFF_CONFIG = {
-  easy: { pairs: 4,  cols: 4, rows: 2 },
-  mid:  { pairs: 8,  cols: 4, rows: 4 },
+const CONFIGS = {
+  easy: { pairs: 6,  cols: 4, rows: 3 },
+  mid:  { pairs: 9,  cols: 6, rows: 3 },
   hard: { pairs: 12, cols: 6, rows: 4 },
 };
 
 // ── STATE ──
-let difficulty = 'easy';
-let teamA = '믿음 팀', teamB = '소망 팀';
+let currentDiff = null;
+let teamA = 'A팀', teamB = 'B팀';
 let scoreA = 0, scoreB = 0;
-let currentTurn = 'A';
-let flippedCards = [];
-let matchedPairs = 0;
-let totalPairs = 0;
-let locked = false;
+let currentTurn = 'a';
 let cards = [];
+let flippedCards = [];
+let locked = false;
+let historyStack = ['difficulty'];
 
-// ── SCREENS ──
+// ── NAV ──
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function selectDiff(diff) {
-  difficulty = diff;
+function goBack() {
+  if (historyStack.length > 1) {
+    historyStack.pop();
+    const prev = historyStack[historyStack.length - 1];
+    showScreen(prev + '-screen');
+    if (prev !== 'game') {
+      document.getElementById('scoreboard').style.display = 'none';
+      document.body.className = '';
+    }
+  } else {
+    location.href = 'index.html';
+  }
+}
+
+function goToTitle() {
+  document.getElementById('modal-overlay').classList.remove('show');
+  historyStack = ['difficulty'];
+  showScreen('difficulty-screen');
+  document.getElementById('scoreboard').style.display = 'none';
+  document.body.className = '';
+}
+
+// ── DIFFICULTY ──
+function selectDifficulty(diff) {
+  currentDiff = diff;
+  historyStack.push('team');
   showScreen('team-screen');
 }
 
-function goHome() {
-  document.getElementById('scoreboard').style.display = 'none';
-  document.getElementById('modal-overlay').classList.remove('show');
-  showScreen('diff-screen');
-}
-
-// ── GAME START ──
+// ── START ──
 function startGame() {
-  teamA = document.getElementById('input-a').value.trim() || '믿음 팀';
-  teamB = document.getElementById('input-b').value.trim() || '소망 팀';
+  teamA = document.getElementById('team-a-input').value.trim() || 'A팀';
+  teamB = document.getElementById('team-b-input').value.trim() || 'B팀';
   scoreA = 0; scoreB = 0;
-  currentTurn = 'A';
+  currentTurn = 'a';
   flippedCards = [];
-  matchedPairs = 0;
   locked = false;
 
-  const cfg = DIFF_CONFIG[difficulty];
-  totalPairs = cfg.pairs;
+  document.getElementById('name-a-score').textContent = teamA;
+  document.getElementById('name-b-score').textContent = teamB;
+  document.getElementById('score-num-a').textContent = '0';
+  document.getElementById('score-num-b').textContent = '0';
+  document.getElementById('final-a-name').textContent = teamA;
+  document.getElementById('final-b-name').textContent = teamB;
 
-  updateScoreboard();
   document.getElementById('scoreboard').style.display = 'flex';
-  buildBoard(cfg);
+
+  historyStack.push('game');
   showScreen('game-screen');
+  buildBoard(CONFIGS[currentDiff]);
+  updateTurnUI();
 }
 
-function replayGame() {
-  document.getElementById('modal-overlay').classList.remove('show');
-  startGame();
+// ── TURN UI ──
+function updateTurnUI() {
+  const boxA = document.getElementById('score-a');
+  const boxB = document.getElementById('score-b');
+  const indicator = document.getElementById('turn-indicator');
+
+  if (currentTurn === 'a') {
+    boxA.classList.add('active-turn');
+    boxB.classList.remove('active-turn');
+    indicator.textContent = '🔵 ' + teamA + ' 차례';
+    document.body.className = 'turn-a';
+  } else {
+    boxB.classList.add('active-turn');
+    boxA.classList.remove('active-turn');
+    indicator.textContent = '🔴 ' + teamB + ' 차례';
+    document.body.className = 'turn-b';
+  }
 }
 
-// ── BOARD ──
+// ── SHUFFLE ──
 function fisherYates(arr) {
+  arr = [...arr];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -494,6 +591,7 @@ function fisherYates(arr) {
   return arr;
 }
 
+// ── BUILD BOARD ──
 function buildBoard(cfg) {
   const board = document.getElementById('board');
   board.style.gridTemplateColumns = 'repeat(' + cfg.cols + ', 1fr)';
@@ -511,10 +609,11 @@ function buildBoard(cfg) {
     el.innerHTML = `
       <div class="card-inner">
         <div class="card-face card-back">
-          <span class="card-back-corner tl">⛪</span>
-          <span class="card-back-corner tr">⛪</span>
-          <span class="card-back-corner bl">⛪</span>
-          <span class="card-back-corner br">⛪</span>
+          <div class="card-back-bg"></div>
+          <span class="card-back-corner tl">✝</span>
+          <span class="card-back-corner tr">✝</span>
+          <span class="card-back-corner bl">✝</span>
+          <span class="card-back-corner br">✝</span>
           <div class="card-back-pattern"></div>
           <div class="card-number">${idx + 1}</div>
         </div>
@@ -522,6 +621,7 @@ function buildBoard(cfg) {
           <img src="${card.img}" alt="${card.name}" class="card-img" loading="lazy">
           <div class="card-matched-overlay" id="overlay-${idx}"></div>
         </div>
+      </div>
     `;
     el.addEventListener('click', () => onCardClick(idx, el));
     board.appendChild(el);
@@ -538,62 +638,44 @@ function onCardClick(idx, el) {
   el.classList.add('flipped');
   flippedCards.push({ idx, el });
 
-  if (flippedCards.length === 2) checkMatch();
-}
+  if (flippedCards.length === 2) {
+    locked = true;
+    const [a, b] = flippedCards;
+    const cardA = cards[a.idx];
+    const cardB = cards[b.idx];
 
-function checkMatch() {
-  locked = true;
-  const [a, b] = flippedCards;
-  const cardA = cards[a.idx];
-  const cardB = cards[b.idx];
+    if (cardA.name === cardB.name) {
+      setTimeout(() => {
+        cards[a.idx].matched = true;
+        cards[b.idx].matched = true;
+        document.getElementById('overlay-' + a.idx).classList.add('show');
+        document.getElementById('overlay-' + b.idx).classList.add('show');
 
-  if (cardA.id === cardB.id) {
-    // MATCH
-    const team = currentTurn;
-    const colorClass = team === 'A' ? 'matched-a' : 'matched-b';
-    [a, b].forEach(f => {
-      cards[f.idx].matched = true;
-      cards[f.idx].matchedBy = team;
-      document.getElementById('front-' + f.idx).classList.add(colorClass);
-      f.el.style.cursor = 'default';
-    });
-    if (team === 'A') scoreA++; else scoreB++;
-    matchedPairs++;
-    flippedCards = [];
-    locked = false;
-    updateScoreboard();
-    if (matchedPairs === totalPairs) setTimeout(showResult, 400);
-  } else {
-    // NO MATCH
-    setTimeout(() => {
-      [a, b].forEach(f => f.el.classList.remove('flipped'));
-      flippedCards = [];
-      currentTurn = currentTurn === 'A' ? 'B' : 'A';
-      locked = false;
-      updateScoreboard();
-    }, 1200);
-  }
-}
+        if (currentTurn === 'a') {
+          scoreA++;
+          document.getElementById('score-num-a').textContent = scoreA;
+        } else {
+          scoreB++;
+          document.getElementById('score-num-b').textContent = scoreB;
+        }
 
-// ── SCOREBOARD ──
-function updateScoreboard() {
-  document.getElementById('name-a').textContent = teamA;
-  document.getElementById('name-b').textContent = teamB;
-  document.getElementById('pts-a').textContent = scoreA;
-  document.getElementById('pts-b').textContent = scoreB;
+        flippedCards = [];
+        locked = false;
 
-  const boxA = document.getElementById('score-a');
-  const boxB = document.getElementById('score-b');
-  const indicator = document.getElementById('turn-indicator');
-
-  if (currentTurn === 'A') {
-    boxA.classList.add('active-turn'); boxB.classList.remove('active-turn');
-    indicator.textContent = '🔵 ' + teamA + '의 차례';
-    indicator.style.color = '#93c5fd';
-  } else {
-    boxB.classList.add('active-turn'); boxA.classList.remove('active-turn');
-    indicator.textContent = '🔴 ' + teamB + '의 차례';
-    indicator.style.color = '#fca5a5';
+        if (cards.every(c => c.matched)) {
+          setTimeout(showResult, 500);
+        }
+      }, 600);
+    } else {
+      setTimeout(() => {
+        a.el.classList.remove('flipped');
+        b.el.classList.remove('flipped');
+        flippedCards = [];
+        locked = false;
+        currentTurn = currentTurn === 'a' ? 'b' : 'a';
+        updateTurnUI();
+      }, 1000);
+    }
   }
 }
 
@@ -607,12 +689,24 @@ function showResult() {
   } else {
     winner = '무승부! 🤝'; emoji = '🤝';
   }
+
   document.getElementById('modal-trophy').textContent = emoji;
   document.getElementById('modal-winner').textContent = winner;
-  document.getElementById('final-a').textContent = teamA + ': ' + scoreA + '점';
-  document.getElementById('final-b').textContent = teamB + ': ' + scoreB + '점';
+  document.getElementById('final-a').textContent = scoreA + '쌍';
+  document.getElementById('final-b').textContent = scoreB + '쌍';
   document.getElementById('modal-overlay').classList.add('show');
   launchConfetti();
+}
+
+// ── RESTART ──
+function restartGame() {
+  document.getElementById('modal-overlay').classList.remove('show');
+  scoreA = 0; scoreB = 0;
+  currentTurn = 'a';
+  document.getElementById('score-num-a').textContent = '0';
+  document.getElementById('score-num-b').textContent = '0';
+  buildBoard(CONFIGS[currentDiff]);
+  updateTurnUI();
 }
 
 // ── CONFETTI ──
