@@ -83,11 +83,16 @@ body.turn-b #header { border-bottom-color: var(--team-b); background: rgba(40,10
   background: var(--surface);
   border: 2px solid rgba(255,255,255,0.1);
   border-radius: 1.5rem;
-  padding: 2.5rem 2rem;
-  width: 240px;
+  padding: 2rem;
+  width: 220px;
+  height: 220px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .diff-card:hover { transform: translateY(-8px); }
 .diff-card.easy:hover { border-color: #4caf50; box-shadow: 0 0 20px #4caf5066; }
@@ -159,8 +164,8 @@ body.turn-b #header { border-bottom-color: var(--team-b); background: rgba(40,10
 body.turn-a #scoreboard { background: rgba(10,22,40,0.97); border-bottom-color: var(--team-a); }
 body.turn-b #scoreboard { background: rgba(40,10,10,0.97); border-bottom-color: var(--team-b); }
 .score-box {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 0.5rem 1rem; border-radius: 0.8rem;
+  flex: 0 0 auto; width: 130px; display: flex; flex-direction: column; align-items: center;
+  padding: 0.5rem 0.8rem; border-radius: 0.8rem;
   transition: all 0.3s;
 }
 .score-box.active-turn { transform: scale(1.08); }
@@ -175,9 +180,10 @@ body.turn-b #scoreboard { background: rgba(40,10,10,0.97); border-bottom-color: 
 .score-box.a .score-num { color: var(--team-a); }
 .score-box.b .score-num { color: var(--team-b); }
 #turn-indicator {
-  font-size: 1rem; text-align: center; font-weight: 700;
-  padding: 0.5rem 1rem; border-radius: 1rem;
-  transition: all 0.5s; min-width: 130px;
+  flex: 1; font-size: 1rem; text-align: center; font-weight: 700;
+  padding: 0.5rem 0.8rem; border-radius: 1rem;
+  transition: all 0.5s; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 body.turn-a #turn-indicator { background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid var(--team-a); }
 body.turn-b #turn-indicator { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid var(--team-b); }
