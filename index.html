@@ -12,6 +12,7 @@
   --accent-reversi: #4caf50;
   --accent-exodus: #ffd700;
   --accent-bible: #a78bfa;
+  --accent-jabbok: #f59e0b;
 }
 body {
   margin: 0; padding: 0;
@@ -34,6 +35,7 @@ h1 { font-size: 2.5rem; margin-bottom: 3rem; text-shadow: 0 0 20px rgba(255,255,
 .game-card.reversi:hover { box-shadow: 0 0 30px var(--accent-reversi); }
 .game-card.exodus:hover { box-shadow: 0 0 30px var(--accent-exodus); }
 .game-card.bible:hover { box-shadow: 0 0 30px var(--accent-bible); }
+.game-card.jabbok:hover { box-shadow: 0 0 30px var(--accent-jabbok); }
 .icon { font-size: 5rem; margin-bottom: 1.5rem; transition: transform 0.3s ease; }
 .game-card:hover .icon { transform: scale(1.1) rotate(5deg); }
 .title { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
@@ -42,29 +44,36 @@ h1 { font-size: 2.5rem; margin-bottom: 3rem; text-shadow: 0 0 20px rgba(255,255,
 .reversi .start-badge { background: var(--accent-reversi); color: #fff; }
 .exodus .start-badge { background: var(--accent-exodus); color: #000; }
 .bible .start-badge { background: var(--accent-bible); color: #fff; }
+.jabbok .start-badge { background: var(--accent-jabbok); color: #000; }
 footer { margin-top: 4rem; font-size: 0.8rem; opacity: 0.4; }
 </style>
 </head>
 <body>
 <h1>Play Board Game</h1>
 <div class="container">
-  <a href="BadgeReversi.html" class="game-card reversi">
+  <a href="badge-reversi/" class="game-card reversi">
     <div class="icon">🐻</div>
     <div class="title">Badge Reversi</div>
     <div class="desc">귀여운 배지들을 뒤집어 승리하세요!<br>순수 로직 보드게임 v29.1</div>
     <div class="start-badge">Play Now</div>
   </a>
-  <a href="ExodusRedsee.html" class="game-card exodus">
+  <a href="exodus-red-sea/" class="game-card exodus">
     <div class="icon">🌊</div>
     <div class="title">Exodus: Red Sea</div>
     <div class="desc">말씀을 타이핑하여 바다를 가르세요!<br>Heavenly Glory v3.2</div>
     <div class="start-badge">Start Journey</div>
   </a>
-  <a href="BibleCardMemory.html" class="game-card bible">
+  <a href="bible-card-memory/" class="game-card bible">
     <div class="icon">✝️</div>
     <div class="title">Bible Card Memory</div>
     <div class="desc">성경 인물 카드를 뒤집어 짝을 맞추세요!<br>주일학교 팀 대결 메모리 게임</div>
     <div class="start-badge">Start Game</div>
+  </a>
+  <a href="jabbok-night/" class="game-card jabbok">
+    <div class="icon">🌙</div>
+    <div class="title">얍복 강의 밤</div>
+    <div class="desc">천사와 씨름한 야곱 이야기를 따라가요!<br>퀴즈와 씨름으로 배우는 창세기 32장</div>
+    <div class="start-badge">Start Story</div>
   </a>
 </div>
 <footer>© 2026 Web Game Development Hub</footer>

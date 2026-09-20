@@ -393,7 +393,7 @@ body.turn-b .team-side-bar.right { background: var(--team-b); box-shadow: 0 0 20
 
 <!-- HEADER -->
 <div id="header">
-  <a href="index.html" id="home-btn">🏠 메인허브</a>
+  <a href="../" id="home-btn">🏠 메인허브</a>
   <h1>✝ 성경 카드 기억 게임</h1>
   <button id="back-btn" onclick="goBack()">◀ 뒤로</button>
 </div>
@@ -483,7 +483,7 @@ body.turn-b .team-side-bar.right { background: var(--team-b); box-shadow: 0 0 20
     <div class="modal-btns">
       <button class="modal-btn primary" onclick="restartGame()">🔄 다시 하기</button>
       <button class="modal-btn secondary" onclick="goToTitle()">📋 난이도 선택</button>
-      <button class="modal-btn secondary" onclick="location.href='index.html'">🏠 메인허브</button>
+      <button class="modal-btn secondary" onclick="location.href='../'">🏠 메인허브</button>
     </div>
   </div>
 </div>
@@ -491,18 +491,18 @@ body.turn-b .team-side-bar.right { background: var(--team-b); box-shadow: 0 0 20
 <script>
 // ── DATA ──
 const ALL_CHARACTERS = [
-  { name: '아브라함', img: 'abraham.png' },
-  { name: '다니엘',   img: 'daniel.png'  },
-  { name: '다윗',     img: 'david.png'   },
-  { name: '에스더',   img: 'esther.png'  },
-  { name: '예수님',   img: 'jesus.png'   },
-  { name: '요나',     img: 'jonah.png'   },
-  { name: '요셉',     img: 'joseph.png'  },
-  { name: '리디아',   img: 'lydia.png'   },
-  { name: '모세',     img: 'moses.png'   },
-  { name: '노아',     img: 'noah.png'    },
-  { name: '바울',     img: 'paul.png'    },
-  { name: '삼손',     img: 'samson.png'  },
+  { name: '아브라함', img: 'img/abraham.png' },
+  { name: '다니엘',   img: 'img/daniel.png'  },
+  { name: '다윗',     img: 'img/david.png'   },
+  { name: '에스더',   img: 'img/esther.png'  },
+  { name: '예수님',   img: 'img/jesus.png'   },
+  { name: '요나',     img: 'img/jonah.png'   },
+  { name: '요셉',     img: 'img/joseph.png'  },
+  { name: '리디아',   img: 'img/lydia.png'   },
+  { name: '모세',     img: 'img/moses.png'   },
+  { name: '노아',     img: 'img/noah.png'    },
+  { name: '바울',     img: 'img/paul.png'    },
+  { name: '삼손',     img: 'img/samson.png'  },
 ];
 
 const CONFIGS = {
@@ -537,7 +537,7 @@ function goBack() {
       document.body.className = '';
     }
   } else {
-    location.href = 'index.html';
+    location.href = '../';
   }
 }
 

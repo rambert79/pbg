@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>얍복 강의 밤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+  :root{
+    --ink:#f6efe0; --ink-dim:#c7c1d9; --night:#0b0e2a;
+    --card:rgba(12,16,46,.86); --card-2:rgba(255,255,255,.07);
+    --gold:#ffcf66; --ember:#f08a4b; --good:#86dca8; --bad:#ff9a8a;
+    --line:rgba(255,207,102,.30);
+    --display:"Jua","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  }
+  [hidden]{display:none!important}
+  html,body{height:100%}
+  body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:20px;overflow:hidden;-webkit-tap-highlight-color:transparent}
+  #app{position:relative;height:100%;min-height:520px;overflow:hidden}
+  #sky{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+  .hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 16px;z-index:5;pointer-events:none}
+  .chip{pointer-events:auto;font-family:var(--display);font-size:19px;background:rgba(10,12,36,.6);border:1px solid var(--line);color:var(--ink);padding:6px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px}
+  .hud-right{display:flex;gap:8px}
+  button.chip{cursor:pointer}
+  a.chip{text-decoration:none;cursor:pointer}
+  .star{color:var(--gold)}
+
+  .screen{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:0 16px 16px;z-index:4}
+  .screen.center{top:0;align-items:center;padding-block:56px 16px}
+  .card{width:100%;max-width:760px;max-height:calc(100% - 8px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px 22px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:0 18px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:14px;animation:rise .35s ease-out}
+  @keyframes rise{from{transform:translateY(10px);opacity:.6}to{transform:none;opacity:1}}
+
+  h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;line-height:1.2}
+  h1{font-size:clamp(34px,8vw,52px);color:var(--gold);letter-spacing:.02em}
+  h2{font-size:clamp(28px,5.5vw,38px);color:var(--gold)}
+  h3{font-size:26px}
+  p{margin:0;line-height:1.65;font-size:24px}
+  .eyebrow{font-family:var(--display);font-size:19px;color:var(--ember);letter-spacing:.08em}
+  .ref{font-size:18px;color:var(--ink-dim)}
+  .speech{background:var(--card-2);border-left:3px solid var(--gold);padding:10px 14px;border-radius:0 12px 12px 0;font-size:24px}
+
+  .btn{font-family:var(--display);font-size:26px;border:0;border-radius:14px;padding:14px 18px;cursor:pointer;color:#2a1a08;background:var(--gold);box-shadow:0 4px 0 #b88a2a;transition:transform .08s;touch-action:manipulation}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #b88a2a}
+  .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);box-shadow:none}
+  .btn:focus-visible,.choice:focus-visible,.mode:focus-visible,.syl:focus-visible,.chip:focus-visible,summary:focus-visible{outline:3px solid #fff;outline-offset:2px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>.btn{flex:1 1 180px}
+
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+  .mode{text-align:left;cursor:pointer;background:var(--card-2);border:2px solid transparent;border-radius:14px;padding:12px 14px;color:var(--ink);font-family:var(--body);font-size:20px;line-height:1.5;display:flex;flex-direction:column;gap:4px}
+  .mode b{font-family:var(--display);font-weight:400;font-size:26px;color:var(--ink)}
+  .mode[aria-pressed="true"]{border-color:var(--gold);background:rgba(255,207,102,.12)}
+
+  details{background:var(--card-2);border-radius:12px;padding:10px 14px}
+  summary{cursor:pointer;font-family:var(--display);font-size:21px;color:var(--ink-dim)}
+  details ul{margin:10px 0 4px;padding-left:20px;line-height:1.7;font-size:20px;color:var(--ink)}
+
+  /* 씨름 */
+  .wrestle{width:100%;max-width:760px;display:flex;flex-direction:column;gap:12px;align-items:stretch}
+  .msg{font-family:var(--display);font-size:clamp(26px,6vw,36px);text-align:center;min-height:1.3em;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+  .msg.warn{color:var(--bad)} .msg.ok{color:var(--good)}
+  .meters{background:rgba(10,12,36,.72);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+  .meter-label{display:flex;justify-content:space-between;font-family:var(--display);font-size:20px;color:var(--ink-dim)}
+  .track{position:relative;height:18px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+  .fill{position:absolute;inset:0 auto 0 0;width:50%;border-radius:999px;background:linear-gradient(90deg,#ff8a6a,#ffcf66 45%,#86dca8);transition:width .06s linear}
+  .danger{position:absolute;inset:0 auto 0 0;width:22%;background:repeating-linear-gradient(135deg,rgba(255,120,110,.25) 0 6px,transparent 6px 12px)}
+  .dawn-track{position:relative;height:10px;border-radius:999px;background:linear-gradient(90deg,#1b2155,#6a5a8a 60%,#f3a765)}
+  .sun{position:absolute;top:50%;left:0;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:radial-gradient(circle,#fff3c4,#ffcf66 60%,#f08a4b);box-shadow:0 0 12px #ffcf66}
+  .hold{font-family:var(--display);font-size:clamp(26px,7vw,34px);width:100%;padding:22px 16px;border-radius:22px;border:0;cursor:pointer;color:#2a1a08;background:radial-gradient(circle at 50% 30%,#ffe9a8,#ffcf66 55%,#e9a23b);box-shadow:0 7px 0 #a8741f,0 0 30px rgba(255,207,102,.35);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+  .hold.pressed{transform:translateY(5px) scale(.99);box-shadow:0 2px 0 #a8741f,0 0 40px rgba(255,207,102,.6)}
+  .hold:disabled{filter:grayscale(.6) brightness(.8);cursor:default}
+  .hint{text-align:center;font-size:19px;color:var(--ink-dim)}
+
+  /* 퀴즈 */
+  .choices{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .choice{font-family:var(--display);font-size:26px;text-align:left;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:var(--card-2);color:var(--ink);cursor:pointer;touch-action:manipulation;line-height:1.3}
+  .choice:hover:not(:disabled){border-color:var(--gold)}
+  .choice.right{border-color:var(--good);background:rgba(134,220,168,.18)}
+  .choice.wrong{border-color:var(--bad);background:rgba(255,154,138,.15)}
+  .choice:disabled{cursor:default}
+  .feedback{font-size:23px;line-height:1.6}
+  .feedback b{font-family:var(--display);font-weight:400;font-size:28px}
+  .feedback .g{color:var(--good)} .feedback .r{color:var(--bad)}
+
+  /* 이름 퍼즐 */
+  .slots{display:flex;justify-content:center;gap:10px}
+  .slot{width:58px;height:66px;border-radius:12px;border:2px dashed var(--line);display:grid;place-items:center;font-family:var(--display);font-size:34px;color:var(--gold)}
+  .slot.filled{border-style:solid;background:rgba(255,207,102,.12);animation:pop .25s}
+  @keyframes pop{50%{transform:scale(1.15)}}
+  .syls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+  .syl{width:64px;height:64px;border-radius:50%;font-family:var(--display);font-size:30px;border:0;cursor:pointer;background:var(--ink);color:#2a1a08;box-shadow:0 4px 0 #a79d86;touch-action:manipulation}
+  .syl:disabled{opacity:.18;cursor:default}
+  .shake{animation:shake .3s}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .israel{font-family:var(--display);font-size:clamp(48px,14vw,72px);color:var(--gold);text-align:center;text-shadow:0 0 24px rgba(255,207,102,.6);animation:glow 1.6s ease-in-out infinite alternate}
+  @keyframes glow{to{text-shadow:0 0 40px rgba(255,207,102,.95)}}
+
+  .score{display:flex;gap:10px;flex-wrap:wrap}
+  .score div{flex:1 1 120px;background:var(--card-2);border-radius:12px;padding:10px 12px;text-align:center}
+  .score b{display:block;font-family:var(--display);font-weight:400;font-size:28px;color:var(--gold);font-variant-numeric:tabular-nums}
+  .score span{font-size:19px;color:var(--ink-dim)}
+  .verse{font-size:24px;line-height:1.7;background:rgba(255,207,102,.1);border-radius:14px;padding:14px 16px}
+  ol.talk{margin:0;padding-left:26px;line-height:1.8;font-size:22px}
+
+  @media (prefers-reduced-motion:reduce){
+    .card,.slot.filled,.shake,.israel{animation:none}
+  }
+</style>
+</head>
+<body style="margin:0">
+
+<div id="app">
+  <canvas id="sky" aria-hidden="true"></canvas>
+
+  <div class="hud">
+    <span class="chip" id="roundChip">얍복 강가 · 밤</span>
+    <div class="hud-right">
+      <span class="chip" aria-label="모은 별"><span class="star">★</span><span id="starCount">0</span></span>
+      <a class="chip" href="../">🏠 메인허브</a>
+      <button class="chip" id="muteBtn" type="button" aria-pressed="false">소리 켜짐</button>
+    </div>
+  </div>
+
+  <!-- 시작 -->
+  <section class="screen center" id="s-title">
+    <div class="card">
+      <span class="eyebrow">창세기 32장 22–32절</span>
+      <h1>얍복 강의 밤</h1>
+      <p>야곱이 밤새 씨름했어요. 버튼을 빠르게 눌러 <b>날이 샐 때까지</b> 꼭 붙잡아 봐요!</p>
+      <div class="modes" role="group" aria-label="난이도">
+        <button class="mode" id="m-easy" type="button" aria-pressed="true"><b>꼬마 모드</b>셋 중 하나 고르기 · 천사가 제법 세요</button>
+        <button class="mode" id="m-hard" type="button" aria-pressed="false"><b>도전 모드</b>넷 중 하나 고르기 · 천사가 아주 세요</button>
+      </div>
+      <button class="btn" id="startBtn" type="button">시작하기</button>
+      <details>
+        <summary>선생님 안내</summary>
+        <ul>
+          <li>본문: 창세기 32:22–32 (함께 읽을 곳: 호세아 12:3–4)</li>
+          <li>세 판 씨름 → 판마다 퀴즈 1문제 → 축복 장면 → 새 이름 맞추기 순서예요. 한 번에 7~10분 걸려요.</li>
+          <li>퀴즈를 맞히면 다음 판에서 붙잡는 힘이 세져요.</li>
+          <li>TV·프로젝터로 할 때는 팀별로 번갈아 한 판씩 하고 별 개수를 비교해 보세요. 키보드 스페이스바로도 누를 수 있어요.</li>
+          <li>나이가 섞여 있으면 어린 친구가 씨름 버튼을, 큰 친구가 퀴즈를 맡으면 좋아요.</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <!-- 이야기 -->
+  <section class="screen" id="s-story" hidden>
+    <div class="card">
+      <span class="eyebrow" id="storyStep">이야기 1 / 3</span>
+      <p id="storyText"></p>
+      <span class="ref" id="storyRef"></span>
+      <button class="btn" id="storyNext" type="button">다음</button>
+    </div>
+  </section>
+
+  <!-- 씨름 -->
+  <section class="screen" id="s-wrestle" hidden>
+    <div class="wrestle">
+      <div class="msg" id="msg" aria-live="polite"></div>
+      <div class="meters">
+        <div class="meter-label"><span>야곱이 붙잡는 힘</span><span id="powerLabel">힘 +0</span></div>
+        <div class="track" aria-hidden="true"><div class="danger"></div><div class="fill" id="fill"></div></div>
+        <div class="meter-label"><span>🌙 밤</span><span>해 뜰 때 🌅</span></div>
+        <div class="dawn-track" aria-hidden="true"><div class="sun" id="sun"></div></div>
+      </div>
+      <button class="hold" id="holdBtn" type="button" disabled>꽉 붙잡기!</button>
+      <div class="hint">빠르게 톡톡 눌러요 · 스페이스바도 돼요</div>
+    </div>
+  </section>
+
+  <!-- 퀴즈 -->
+  <section class="screen" id="s-quiz" hidden>
+    <div class="card">
+      <span class="eyebrow" id="quizStep">잠깐 쉬어요 · 퀴즈</span>
+      <h2 id="quizQ"></h2>
+      <div class="choices" id="quizChoices"></div>
+      <div class="feedback" id="quizFb" aria-live="polite" hidden></div>
+      <button class="btn" id="quizNext" type="button" hidden>다음 판 씨름하기</button>
+    </div>
+  </section>
+
+  <!-- 축복 선택 -->
+  <section class="screen" id="s-bless" hidden>
+    <div class="card">
+      <span class="eyebrow">날이 새려 할 때</span>
+      <p>그 사람이 야곱의 <b>허벅지 관절</b>을 쳤어요. 관절이 어긋났지만 야곱은 놓지 않았어요.</p>
+      <div class="speech">“날이 새려 하니 나를 가게 하라.”</div>
+      <h3>야곱은 뭐라고 대답했을까요?</h3>
+      <div class="choices" id="blessChoices">
+        <button class="choice" type="button" data-ok="0">“네, 이제 가세요.”</button>
+        <button class="choice" type="button" data-ok="1">“저를 축복해 주시기 전에는 보내지 않겠어요!”</button>
+      </div>
+      <div class="feedback" id="blessFb" aria-live="polite" hidden></div>
+      <span class="ref">창세기 32:25–26</span>
+    </div>
+  </section>
+
+  <!-- 새 이름 -->
+  <section class="screen" id="s-name" hidden>
+    <div class="card">
+      <span class="eyebrow">새 이름을 받아요</span>
+      <div class="speech">“네 이름이 무엇이냐?” — “야곱입니다.”</div>
+      <p id="nameGuide">하나님이 야곱에게 새 이름을 주셨어요. 글자를 순서대로 눌러 새 이름을 만들어 봐요!</p>
+      <div class="slots" id="slots"></div>
+      <div class="syls" id="syls"></div>
+      <div id="nameReveal" hidden>
+        <div class="israel">이스라엘</div>
+        <p>“네 이름을 다시는 야곱이라 부르지 않고 이스라엘이라 부를 것이다. 네가 하나님과 사람들과 겨루어 이겼기 때문이다.”</p>
+        <span class="ref">창세기 32:28 (쉬운 말로 옮김)</span>
+      </div>
+      <button class="btn" id="nameNext" type="button" hidden>해가 떠올라요</button>
+    </div>
+  </section>
+
+  <!-- 끝 -->
+  <section class="screen" id="s-end" hidden>
+    <div class="card">
+      <span class="eyebrow">브니엘 · 하나님의 얼굴</span>
+      <h2>해가 떠올랐어요!</h2>
+      <p>야곱은 그곳을 <b>브니엘</b>이라고 불렀어요. “내가 하나님을 얼굴과 얼굴을 대하여 보았다”는 뜻이에요. 해가 돋을 때, 야곱은 다리를 절며 길을 떠났어요.</p>
+      <span class="ref">창세기 32:30–31</span>
+      <div class="score">
+        <div><b id="endStars">0</b><span>모은 별</span></div>
+        <div><b id="endQuiz">0 / 3</b><span>맞힌 퀴즈</span></div>
+        <div><b id="endSlips">0</b><span>미끄러진 횟수</span></div>
+      </div>
+      <h3>함께 이야기해요</h3>
+      <ol class="talk">
+        <li>야곱은 다리가 아팠는데도 왜 끝까지 놓지 않았을까요?</li>
+        <li>내가 하나님께 꼭 붙잡고 기도하고 싶은 것은 무엇인가요?</li>
+      </ol>
+      <div class="row">
+        <button class="btn" id="againBtn" type="button">다시 하기</button>
+        <button class="btn ghost" id="homeBtn" type="button">처음으로</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- 데이터 ---------- */
+  const STORY = [
+    { t: '야곱은 형 <b>에서</b>를 만나러 가는 길이었어요. 오래전 형과 사이가 나빠졌기 때문에 마음이 무척 두려웠어요.', r: '창세기 32:6–7' },
+    { t: '밤이 되자 야곱은 가족을 <b>얍복 나루</b> 건너편으로 먼저 보내고, 혼자 남았어요.', r: '창세기 32:22–24' },
+    { t: '그때 <b>어떤 사람</b>이 나타나 야곱과 씨름을 했어요. 호세아서는 그분을 <b>천사</b>라고 불러요. 자, 날이 샐 때까지 버텨 봐요!', r: '창세기 32:24 · 호세아 12:4' }
+  ];
+
+  const QUIZ = {
+    easy: [
+      { q: '야곱이 밤새 씨름한 곳은 어디일까요?', c: ['🌊 얍복 강가', '⛰️ 높은 산 꼭대기', '🏜️ 넓은 사막'], a: 0, r: '창세기 32:22' },
+      { q: '야곱은 언제까지 씨름했나요?', c: ['🌅 날이 샐 때까지', '🍚 점심 먹을 때까지', '🌙 달이 뜰 때까지'], a: 0, r: '창세기 32:24' },
+      { q: '야곱이 만나러 가던 형의 이름은?', c: ['요셉', '에서', '라반'], a: 1, r: '창세기 32:6' },
+      { q: '가족을 먼저 보낸 뒤 야곱은 어떻게 되었나요?', c: ['👨‍👩‍👧 가족과 함께 있었어요', '🧍 혼자 남았어요', '🐑 양들과 잠들었어요'], a: 1, r: '창세기 32:23–24' },
+      { q: '야곱의 아버지는 누구일까요?', c: ['이삭', '노아', '아브라함'], a: 0, r: '창세기 25:26' },
+      { q: '씨름이 끝난 뒤 야곱은 어떻게 걸었나요?', c: ['🦶 다리를 절며 걸었어요', '🏃 신나게 뛰었어요', '💃 춤추며 걸었어요'], a: 0, r: '창세기 32:31' },
+      { q: '야곱이 씨름한 곳에 붙인 이름은?', c: ['벧엘', '브니엘', '여리고'], a: 1, r: '창세기 32:30' },
+      { q: '야곱이 새로 받은 이름은?', c: ['이스라엘', '아브라함', '모세'], a: 0, r: '창세기 32:28' }
+    ],
+    hard: [
+      { q: '씨름하던 사람이 야곱의 어디를 쳤나요?', c: ['어깨', '허벅지 관절', '팔', '머리'], a: 1, r: '창세기 32:25' },
+      { q: '야곱은 가족을 어디 건너편으로 먼저 보냈나요?', c: ['요단강', '홍해', '얍복 나루', '나일강'], a: 2, r: '창세기 32:22' },
+      { q: '해가 돋았을 때 야곱은 어떻게 걸었나요?', c: ['뛰어갔어요', '낙타를 탔어요', '업혀 갔어요', '다리를 절며 걸었어요'], a: 3, r: '창세기 32:31' },
+      { q: '야곱이 씨름한 곳에 붙인 이름은?', c: ['벧엘', '브니엘', '베들레헴', '여리고'], a: 1, r: '창세기 32:30' },
+      { q: '야곱이 두려워하며 만나러 가던 사람은?', c: ['형 에서', '외삼촌 라반', '아버지 이삭', '아들 요셉'], a: 0, r: '창세기 32:6–7' },
+      { q: '야곱이 “이름이 무엇입니까?” 하고 묻자 그 사람은 어떻게 했나요?', c: ['이름을 크게 외쳤어요', '대답 대신 야곱을 축복했어요', '도망갔어요', '다시 씨름했어요'], a: 1, r: '창세기 32:29' },
+      { q: '“이스라엘”이라는 새 이름은 왜 주어졌나요?', c: ['하나님과 겨루어 이겼기 때문에', '가장 힘이 세서', '형을 이겼기 때문에', '가장 부자가 되어서'], a: 0, r: '창세기 32:28' },
+      { q: '그 사람이 야곱에게 “나를 보내 달라”고 한 까닭은?', c: ['비가 와서', '날이 새려 하니까', '야곱이 너무 무거워서', '가족이 불러서'], a: 1, r: '창세기 32:26' },
+      { q: '이스라엘 자손이 지금까지도 먹지 않는 것은?', c: ['물고기', '꿀', '허벅지 관절의 힘줄', '포도'], a: 2, r: '창세기 32:32' },
+      { q: '야곱이 들은 소식에서 에서와 함께 오는 사람은 몇 명이었나요?', c: ['열 명', '사백 명', '백 명', '천 명'], a: 1, r: '창세기 32:6' }
+    ]
+  };
+
+  const MODES = {
+    easy: { force: [16, 21, 26], tap: 6, dur: 16, surge: 12 },
+    hard: { force: [25, 31, 37], tap: 5.5, dur: 18, surge: 18 }
+  };
+
+  const DAWN = [[0.04, 0.24], [0.24, 0.44], [0.44, 0.64]];
+  const ROUND_NAME = ['깊은 밤', '새벽이 가까워요', '동이 터 와요'];
+
+  /* ---------- 상태 ---------- */
+  const S = {
+    mode: 'easy', round: 0, balance: 50, time: 0, slips: 0, totalSlips: 0,
+    stars: 0, correct: 0, power: 0, qs: [], running: false, stun: 0, surgeIn: 3,
+    dawn: 0, dawnTarget: 0, scene: 'wrestle', angelA: 1, angelTarget: 1, shake: 0, bump: 0
+  };
+
+  /* ---------- 소리 ---------- */
+  let ac = null, muted = false;
+  function tone(f, d = 0.08, type = 'sine', v = 0.12, delay = 0) {
+    if (muted) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(v, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + d);
+      o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + d + 0.02);
+    } catch (e) {}
+  }
+  const sfx = {
+    tap: () => tone(180 + S.balance * 3, 0.05, 'triangle', 0.08),
+    surge: () => tone(90, 0.25, 'sawtooth', 0.07),
+    slip: () => { tone(300, 0.12, 'square', 0.06); tone(180, 0.2, 'square', 0.06, 0.1); },
+    good: () => [523, 659, 784].forEach((f, i) => tone(f, 0.18, 'triangle', 0.1, i * 0.1)),
+    bad: () => { tone(220, 0.18, 'triangle', 0.09); tone(185, 0.25, 'triangle', 0.09, 0.15); },
+    fanfare: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone(f, 0.22, 'triangle', 0.1, i * 0.14))
+  };
+  $('muteBtn').onclick = () => {
+    muted = !muted;
+    $('muteBtn').textContent = muted ? '소리 꺼짐' : '소리 켜짐';
+    $('muteBtn').setAttribute('aria-pressed', String(muted));
+  };
+
+  /* ---------- 화면 전환 ---------- */
+  const SCREENS = ['s-title', 's-story', 's-wrestle', 's-quiz', 's-bless', 's-name', 's-end'];
+  function show(id) {
+    SCREENS.forEach(s => $(s).hidden = s !== id);
+    const first = $(id).querySelector('button:not([disabled]):not([hidden])');
+    if (first && id !== 's-wrestle') setTimeout(() => first.focus({ preventScroll: true }), 50);
+  }
+  const setChip = t => $('roundChip').textContent = t;
+  const setStars = () => $('starCount').textContent = S.stars;
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  /* ---------- 시작 ---------- */
+  function pickMode(m) {
+    S.mode = m;
+    $('m-easy').setAttribute('aria-pressed', String(m === 'easy'));
+    $('m-hard').setAttribute('aria-pressed', String(m === 'hard'));
+  }
+  $('m-easy').onclick = () => pickMode('easy');
+  $('m-hard').onclick = () => pickMode('hard');
+
+  function reset() {
+    Object.assign(S, { round: 0, balance: 50, slips: 0, totalSlips: 0, stars: 0, correct: 0, power: 0,
+      running: false, scene: 'wrestle', angelTarget: 1, dawnTarget: 0.02 });
+    S.qs = shuffle(QUIZ[S.mode]).slice(0, 3);
+    setStars();
+  }
+  function goHome() { reset(); S.dawnTarget = 0; setChip('얍복 강가 · 밤'); show('s-title'); }
+
+  let storyI = 0;
+  function showStory() {
+    const s = STORY[storyI];
+    $('storyStep').textContent = `이야기 ${storyI + 1} / ${STORY.length}`;
+    $('storyText').innerHTML = s.t;
+    $('storyRef').textContent = s.r;
+    $('storyNext').textContent = storyI === STORY.length - 1 ? '씨름 시작!' : '다음';
+  }
+  $('startBtn').onclick = () => { reset(); storyI = 0; showStory(); setChip('이야기'); show('s-story'); tone(440, 0.1); };
+  $('storyNext').onclick = () => {
+    storyI++;
+    if (storyI < STORY.length) showStory(); else startRound();
+  };
+
+  /* ---------- 씨름 ---------- */
+  const hold = $('holdBtn'), msg = $('msg');
+  function say(t, cls = '') { msg.textContent = t; msg.className = 'msg ' + cls; }
+
+  function startRound() {
+    S.round++;
+    Object.assign(S, { balance: 50, time: 0, slips: 0, stun: 0, surgeIn: 2.5 + Math.random() * 2, scene: 'wrestle', angelTarget: 1 });
+    S.dawnTarget = DAWN[S.round - 1][0];
+    setChip(`${S.round}번째 판 · ${ROUND_NAME[S.round - 1]}`);
+    $('powerLabel').textContent = `힘 +${S.power}`;
+    show('s-wrestle');
+    hold.disabled = true;
+    const steps = ['3', '2', '1', '시작!'];
+    steps.forEach((t, i) => setTimeout(() => {
+      say(t); tone(i === 3 ? 880 : 520, 0.12, 'triangle', 0.1);
+      if (i === 3) { S.running = true; hold.disabled = false; hold.focus({ preventScroll: true }); }
+    }, i * 650));
+  }
+
+  function press() {
+    if (!S.running || S.stun > 0) return;
+    const m = MODES[S.mode];
+    S.balance = Math.min(100, S.balance + m.tap + S.power * 1.2);
+    S.bump = 1;
+    sfx.tap();
+    hold.classList.add('pressed');
+    setTimeout(() => hold.classList.remove('pressed'), 70);
+  }
+  hold.addEventListener('pointerdown', e => { e.preventDefault(); press(); });
+  hold.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (!e.repeat) press(); } });
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && !$('s-wrestle').hidden) { e.preventDefault(); if (!e.repeat) press(); }
+  });
+
+  function tick(dt) {
+    const m = MODES[S.mode];
+    S.time += dt;
+    const k = Math.min(1, S.time / m.dur);
+    const [d0, d1] = DAWN[S.round - 1];
+    S.dawnTarget = d0 + (d1 - d0) * k;
+
+    if (S.stun > 0) {
+      S.stun -= dt;
+      if (S.stun <= 0) { S.balance = 40; say('다시 꽉!'); }
+    } else {
+      let f = m.force[S.round - 1];
+      if (S.balance > 60) f *= 1 + (S.balance - 60) / 60;
+      S.balance -= f * dt;
+      S.surgeIn -= dt;
+      if (S.surgeIn <= 0) {
+        S.balance -= m.surge; S.surgeIn = 2.2 + Math.random() * 2.5; S.shake = 1;
+        say('천사가 힘껏 밀어요!', 'warn'); sfx.surge();
+      } else if (S.balance < 25 && msg.textContent !== '천사가 힘껏 밀어요!') {
+        say('힘을 내요! 더 빨리!', 'warn');
+      } else if (S.balance > 70 && S.surgeIn < 1.9) {
+        say('잘 버티고 있어요!', 'ok');
+      }
+      if (S.balance <= 0) {
+        S.balance = 0; S.stun = 0.9; S.slips++; S.totalSlips++;
+        say('앗, 미끄러졌어요!', 'warn'); sfx.slip();
+      }
+    }
+    if (S.time >= m.dur) endRound();
+    $('fill').style.width = S.balance + '%';
+    $('sun').style.left = (k * 100) + '%';
+  }
+
+  function endRound() {
+    S.running = false; hold.disabled = true;
+    const got = S.slips === 0 ? 3 : S.slips <= 2 ? 2 : 1;
+    S.stars += got; setStars();
+    say(`버텼어요! 별 ${'★'.repeat(got)}`, 'ok'); sfx.good();
+    setTimeout(showQuiz, 1400);
+  }
+
+  /* ---------- 퀴즈 ---------- */
+  function showQuiz() {
+    const q = S.qs[S.round - 1];
+    setChip(`퀴즈 ${S.round} / 3`);
+    $('quizStep').textContent = `잠깐 쉬어요 · 퀴즈 ${S.round} / 3`;
+    $('quizQ').textContent = q.q;
+    const box = $('quizChoices'); box.innerHTML = '';
+    shuffle(q.c.map((c, i) => ({ c, i }))).forEach(({ c, i }) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'choice'; b.textContent = c; b.dataset.i = i;
+      b.onclick = () => answer(i);
+      box.appendChild(b);
+    });
+    $('quizFb').hidden = true; $('quizNext').hidden = true;
+    show('s-quiz');
+  }
+  function answer(i) {
+    const q = S.qs[S.round - 1];
+    const btns = [...$('quizChoices').children];
+    btns.forEach(b => { const j = +b.dataset.i; b.disabled = true; if (j === q.a) b.classList.add('right'); else if (j === i) b.classList.add('wrong'); });
+    const fb = $('quizFb');
+    if (i === q.a) {
+      S.correct++; S.power++; S.stars++; setStars(); sfx.good();
+      fb.innerHTML = `<b class="g">정답이에요!</b> 붙잡는 힘이 세졌어요 (+1). 별도 하나 더! <span class="ref">· ${q.r}</span>`;
+    } else {
+      sfx.bad();
+      fb.innerHTML = `<b class="r">아쉬워요!</b> 정답은 “${q.c[q.a]}”이에요. <span class="ref">· ${q.r}</span>`;
+    }
+    fb.hidden = false;
+    $('quizNext').textContent = S.round < 3 ? '다음 판 씨름하기' : '날이 새려 해요…';
+    $('quizNext').hidden = false;
+    $('quizNext').focus({ preventScroll: true });
+  }
+  $('quizNext').onclick = () => { if (S.round < 3) startRound(); else showBless(); };
+
+  /* ---------- 축복 ---------- */
+  function showBless() {
+    S.dawnTarget = 0.72; S.scene = 'wrestle'; setChip('날이 새려 할 때');
+    [...$('blessChoices').children].forEach(b => { b.disabled = false; b.classList.remove('right', 'wrong'); });
+    $('blessFb').hidden = true;
+    show('s-bless'); S.shake = 1; tone(110, 0.3, 'sawtooth', 0.06);
+  }
+  [...$('blessChoices').children].forEach(b => b.onclick = () => {
+    const fb = $('blessFb');
+    if (b.dataset.ok === '1') {
+      b.classList.add('right');
+      [...$('blessChoices').children].forEach(x => x.disabled = true);
+      fb.innerHTML = '<b class="g">맞아요!</b> 야곱은 아파도 끝까지 붙잡고 축복을 구했어요.';
+      fb.hidden = false; sfx.good(); S.scene = 'bless';
+      setTimeout(showName, 2000);
+    } else {
+      b.classList.add('wrong'); b.disabled = true;
+      fb.innerHTML = '<b class="r">음…</b> 야곱은 그냥 놓아 주었을까요? 다시 골라 봐요!';
+      fb.hidden = false; sfx.bad();
+    }
+  });
+
+  /* ---------- 새 이름 ---------- */
+  const NAME = ['이', '스', '라', '엘'];
+  let nameIdx = 0;
+  function showName() {
+    S.dawnTarget = 0.84; setChip('새 이름');
+    nameIdx = 0;
+    $('slots').innerHTML = NAME.map(() => '<div class="slot"></div>').join('');
+    let order;
+    do { order = shuffle(NAME); } while (order.join('') === NAME.join(''));
+    const box = $('syls'); box.innerHTML = '';
+    order.forEach(ch => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'syl'; b.textContent = ch;
+      b.setAttribute('aria-label', `글자 ${ch}`);
+      b.onclick = () => {
+        if (ch === NAME[nameIdx]) {
+          const slot = $('slots').children[nameIdx];
+          slot.textContent = ch; slot.classList.add('filled');
+          b.disabled = true; nameIdx++; tone(400 + nameIdx * 120, 0.12, 'triangle', 0.1);
+          if (nameIdx === NAME.length) revealName();
+        } else {
+          b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); sfx.bad();
+        }
+      };
+      box.appendChild(b);
+    });
+    $('nameGuide').hidden = false; $('syls').hidden = false; $('slots').hidden = false;
+    $('nameReveal').hidden = true; $('nameNext').hidden = true;
+    show('s-name');
+  }
+  function revealName() {
+    setTimeout(() => {
+      $('nameGuide').hidden = true; $('syls').hidden = true; $('slots').hidden = true;
+      $('nameReveal').hidden = false; $('nameNext').hidden = false;
+      S.stars += 2; setStars(); sfx.fanfare();
+      $('nameNext').focus({ preventScroll: true });
+    }, 500);
+  }
+  $('nameNext').onclick = showEnd;
+
+  /* ---------- 끝 ---------- */
+  function showEnd() {
+    S.dawnTarget = 1; S.scene = 'alone'; S.angelTarget = 0; setChip('브니엘 · 아침');
+    $('endStars').textContent = S.stars;
+    $('endQuiz').textContent = `${S.correct} / 3`;
+    $('endSlips').textContent = S.totalSlips;
+    show('s-end');
+  }
+  $('againBtn').onclick = () => { reset(); S.dawn = 0.02; startRound(); };
+  $('homeBtn').onclick = goHome;
+
+  /* ---------- 그림 ---------- */
+  const cv = $('sky'), ctx = cv.getContext('2d');
+  let W = 0, H = 0, dpr = 1;
+  function resize() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+  }
+  window.addEventListener('resize', resize); resize();
+
+  const STARS = Array.from({ length: 90 }, () => ({ x: Math.random(), y: Math.random() * 0.9, r: Math.random() * 1.3 + 0.3, p: Math.random() * 6.28 }));
+  const hx = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  function mix(a, b, t) { const A = hx(a), B = hx(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',')})`; }
+
+  function person(x, base, lean, u, c, dir, alpha) {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.translate(x, base); ctx.rotate(lean);
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = c.leg; ctx.lineWidth = 5 * u;
+    ctx.beginPath(); ctx.moveTo(-5 * u, -34 * u); ctx.lineTo(-11 * u, 0); ctx.moveTo(5 * u, -34 * u); ctx.lineTo(11 * u, 0); ctx.stroke();
+    ctx.fillStyle = c.robe;
+    ctx.beginPath(); ctx.moveTo(-11 * u, -78 * u); ctx.lineTo(11 * u, -78 * u); ctx.lineTo(19 * u, -26 * u); ctx.lineTo(-19 * u, -26 * u); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = c.sash; ctx.lineWidth = 3.5 * u;
+    ctx.beginPath(); ctx.moveTo(-14 * u, -52 * u); ctx.lineTo(14 * u, -52 * u); ctx.stroke();
+    ctx.strokeStyle = c.robe; ctx.lineWidth = 6 * u;
+    ctx.beginPath(); ctx.moveTo(6 * u * dir, -72 * u); ctx.lineTo(24 * u * dir, -66 * u); ctx.lineTo(30 * u * dir, -74 * u); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-6 * u * dir, -72 * u); ctx.lineTo(16 * u * dir, -58 * u); ctx.stroke();
+    ctx.fillStyle = c.skin;
+    ctx.beginPath(); ctx.arc(0, -89 * u, 10 * u, 0, 6.29); ctx.fill();
+    ctx.fillStyle = c.hair;
+    ctx.beginPath(); ctx.arc(0, -92 * u, 10.5 * u, Math.PI * 1.05, Math.PI * 1.95); ctx.fill();
+    if (c.beard) { ctx.beginPath(); ctx.arc(2 * u * dir, -84 * u, 7 * u, 0.1, Math.PI - 0.1); ctx.fill(); }
+    ctx.restore();
+  }
+
+  function draw(t) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const d = S.dawn, hz = H * 0.4;
+    const g = ctx.createLinearGradient(0, 0, 0, hz);
+    g.addColorStop(0, mix('#060922', '#4d74a8', d));
+    g.addColorStop(0.62, mix('#131947', '#e59d7a', d));
+    g.addColorStop(1, mix('#262b5e', '#ffd49a', d));
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, hz + 2);
+
+    const sa = Math.max(0, 1 - d * 1.6);
+    if (sa > 0) {
+      ctx.fillStyle = '#fff8e6';
+      STARS.forEach(s => {
+        ctx.globalAlpha = sa * (0.5 + 0.5 * Math.sin(t * 1.4 + s.p));
+        ctx.beginPath(); ctx.arc(s.x * W, s.y * hz, s.r, 0, 6.29); ctx.fill();
+      });
+      ctx.globalAlpha = sa;
+      const mg = ctx.createRadialGradient(W * 0.8, H * 0.15, 0, W * 0.8, H * 0.15, 60);
+      mg.addColorStop(0, 'rgba(255,245,215,.5)'); mg.addColorStop(1, 'rgba(255,245,215,0)');
+      ctx.fillStyle = mg; ctx.fillRect(W * 0.8 - 60, H * 0.15 - 60, 120, 120);
+      ctx.fillStyle = '#f6eed2'; ctx.beginPath(); ctx.arc(W * 0.8, H * 0.15, 16, 0, 6.29); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    if (d > 0.5) {
+      const k = (d - 0.5) / 0.5, sy = hz + 24 - k * H * 0.2, sx = W * 0.3;
+      const sg = ctx.createRadialGradient(sx, sy, 0, sx, sy, 140);
+      sg.addColorStop(0, `rgba(255,220,140,${0.6 * k})`); sg.addColorStop(1, 'rgba(255,220,140,0)');
+      ctx.fillStyle = sg; ctx.fillRect(sx - 140, sy - 140, 280, 280);
+      ctx.fillStyle = '#ffd56e'; ctx.beginPath(); ctx.arc(sx, sy, 28, 0, 6.29); ctx.fill();
+    }
+    ctx.fillStyle = mix('#0f1338', '#7c6784', d);
+    ctx.beginPath(); ctx.moveTo(0, hz);
+    for (let x = 0; x <= W; x += 20) ctx.lineTo(x, hz - H * 0.05 - Math.sin(x * 0.006 + 1) * H * 0.03 - Math.sin(x * 0.017) * H * 0.012);
+    ctx.lineTo(W, hz + 2); ctx.lineTo(0, hz + 2); ctx.fill();
+
+    const rb = hz + H * 0.09;
+    const rg = ctx.createLinearGradient(0, hz, 0, rb);
+    rg.addColorStop(0, mix('#18204a', '#9dbcd6', d)); rg.addColorStop(1, mix('#0e1435', '#6d91b1', d));
+    ctx.fillStyle = rg; ctx.fillRect(0, hz, W, rb - hz + 2);
+    ctx.strokeStyle = `rgba(255,240,210,${0.12 + 0.25 * d})`; ctx.lineWidth = 1.5;
+    for (let i = 0; i < 9; i++) {
+      const y = hz + 6 + i * (rb - hz - 10) / 9, off = ((t * (14 + i * 3)) + i * 97) % (W + 120) - 60;
+      ctx.beginPath(); ctx.moveTo(off, y); ctx.lineTo(off + 30 + (i % 3) * 16, y); ctx.stroke();
+    }
+    ctx.fillStyle = mix('#0b0e22', '#6d523a', d);
+    ctx.beginPath(); ctx.moveTo(0, rb + 8);
+    for (let x = 0; x <= W; x += 20) ctx.lineTo(x, rb - Math.sin(x * 0.004) * 8);
+    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill();
+    ctx.strokeStyle = mix('#141a30', '#8a7a4a', d); ctx.lineWidth = 2;
+    for (let i = 0; i < 14; i++) {
+      const x = (i < 7 ? i * 14 + 10 : W - (i - 7) * 14 - 10), sway = Math.sin(t * 1.3 + i) * 4;
+      ctx.beginPath(); ctx.moveTo(x, rb + 20); ctx.quadraticCurveTo(x + sway, rb - 10, x + sway * 1.6, rb - 30 - (i % 3) * 8); ctx.stroke();
+    }
+
+    const u = Math.min(H * 0.2, W * 0.36) / 100, base = rb + Math.min(H * 0.06, 50);
+    const L = 0.42 + 0.58 * d, sh = c => mix('#0a0d24', c, L);
+    const jc = { robe: sh('#9a5b35'), sash: sh('#d9b26a'), skin: sh('#d4a373'), hair: sh('#3b2a1f'), leg: sh('#6b3f25'), beard: true };
+    const ac2 = { robe: sh('#efeaf7'), sash: sh('#ffd36b'), skin: sh('#f0d7b8'), hair: sh('#e9dcc0'), leg: sh('#cfc8de') };
+    const off = (S.balance - 50) / 50 * W * 0.05;
+    const wob = reduceMotion ? 0 : (S.running ? Math.sin(t * 28) * 1.3 * u * (0.6 + S.shake) : Math.sin(t * 2) * 0.6 * u);
+    const bump = S.bump * 3 * u;
+    const cx = W / 2 + (S.scene === 'wrestle' ? off : 0);
+
+    if (S.angelA > 0.01) {
+      const gx = S.scene === 'alone' ? cx + 40 * u : cx + 22 * u;
+      const gg = ctx.createRadialGradient(gx, base - 55 * u, 0, gx, base - 55 * u, 80 * u);
+      gg.addColorStop(0, `rgba(255,236,180,${(S.scene === 'bless' ? 0.6 : 0.35) * S.angelA})`); gg.addColorStop(1, 'rgba(255,236,180,0)');
+      ctx.fillStyle = gg; ctx.fillRect(gx - 80 * u, base - 135 * u, 160 * u, 160 * u);
+    }
+    if (S.scene === 'wrestle') {
+      person(cx - 22 * u + wob + bump, base, 0.14 - S.stun * 0.2, u, jc, 1, 1);
+      person(cx + 22 * u - wob, base, -0.14, u, ac2, -1, S.angelA);
+    } else if (S.scene === 'bless') {
+      person(cx - 18 * u, base, 0.08, u, jc, 1, 1);
+      person(cx + 18 * u, base, -0.05, u, ac2, -1, S.angelA);
+    } else {
+      const limp = reduceMotion ? 0 : Math.abs(Math.sin(t * 2.6));
+      person(cx + 40 * u, base, -0.05, u, ac2, -1, S.angelA);
+      person(cx - 10 * u, base + limp * 3 * u, 0.06 * limp - 0.03, u, jc, 1, 1);
+    }
+  }
+
+  /* ---------- 루프 ---------- */
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (S.running) tick(dt);
+    S.dawn += (S.dawnTarget - S.dawn) * Math.min(1, dt * 1.5);
+    S.angelA += (S.angelTarget - S.angelA) * Math.min(1, dt * 0.8);
+    S.shake = Math.max(0, S.shake - dt * 2.5);
+    S.bump = Math.max(0, S.bump - dt * 8);
+    draw(now / 1000);
+    requestAnimationFrame(loop);
+  }
+  S.dawnTarget = 0; requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
