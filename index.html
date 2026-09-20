@@ -13,6 +13,7 @@
   --accent-exodus: #ffd700;
   --accent-bible: #a78bfa;
   --accent-jabbok: #f59e0b;
+  --accent-creation: #38bdf8;
 }
 body {
   margin: 0; padding: 0;
@@ -36,6 +37,7 @@ h1 { font-size: 2.5rem; margin-bottom: 3rem; text-shadow: 0 0 20px rgba(255,255,
 .game-card.exodus:hover { box-shadow: 0 0 30px var(--accent-exodus); }
 .game-card.bible:hover { box-shadow: 0 0 30px var(--accent-bible); }
 .game-card.jabbok:hover { box-shadow: 0 0 30px var(--accent-jabbok); }
+.game-card.creation:hover { box-shadow: 0 0 30px var(--accent-creation); }
 .icon { font-size: 5rem; margin-bottom: 1.5rem; transition: transform 0.3s ease; }
 .game-card:hover .icon { transform: scale(1.1) rotate(5deg); }
 .title { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
@@ -45,6 +47,7 @@ h1 { font-size: 2.5rem; margin-bottom: 3rem; text-shadow: 0 0 20px rgba(255,255,
 .exodus .start-badge { background: var(--accent-exodus); color: #000; }
 .bible .start-badge { background: var(--accent-bible); color: #fff; }
 .jabbok .start-badge { background: var(--accent-jabbok); color: #000; }
+.creation .start-badge { background: var(--accent-creation); color: #000; }
 footer { margin-top: 4rem; font-size: 0.8rem; opacity: 0.4; }
 </style>
 </head>
@@ -74,6 +77,12 @@ footer { margin-top: 4rem; font-size: 0.8rem; opacity: 0.4; }
     <div class="title">얍복 강의 밤</div>
     <div class="desc">천사와 씨름한 야곱 이야기를 따라가요!<br>퀴즈와 씨름으로 배우는 창세기 32장</div>
     <div class="start-badge">Start Story</div>
+  </a>
+  <a href="creation-days/" class="game-card creation">
+    <div class="icon">🌍</div>
+    <div class="title">창조의 7일</div>
+    <div class="desc">하나님의 말씀대로 세상을 만들어요!<br>3D 오픈맵으로 배우는 창세기 1장</div>
+    <div class="start-badge">Enter World</div>
   </a>
 </div>
 <footer>© 2026 Web Game Development Hub</footer>

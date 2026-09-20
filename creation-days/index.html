@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>창조의 7일</title>
+<style>
+  :root{
+    --ink:#f6efe0; --ink-dim:#c9cfe4; --gold:#ffd76a; --sky:#7cc8ff; --good:#8fe3ac; --bad:#ff9a8a;
+    --panel:rgba(9,14,40,.74); --line:rgba(255,215,106,.34);
+    --font:"Jua","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  }
+  [hidden]{display:none!important}
+  *{box-sizing:border-box;word-break:keep-all}
+  html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:var(--font);font-size:20px;overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+  #gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+  .chip{font-family:var(--font);font-size:19px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 14px;display:inline-flex;align-items:center;gap:6px;text-decoration:none;cursor:pointer}
+  .chip:focus-visible,.btn:focus-visible,#act:focus-visible{outline:3px solid #fff;outline-offset:2px}
+  #top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;z-index:5;pointer-events:none}
+  #top>*{pointer-events:auto}
+  #top .r{display:flex;gap:8px}
+  #dayChip{cursor:default;font-size:21px;color:var(--gold)}
+
+  #panel{position:fixed;top:58px;left:50%;transform:translateX(-50%);width:min(860px,94vw);z-index:4;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px 20px;display:flex;flex-direction:column;gap:8px;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);pointer-events:none}
+  #speechLab{font-size:17px;color:#ffb37a;letter-spacing:.06em}
+  #speechText{font-size:clamp(24px,3.4vw,32px);line-height:1.35;color:var(--gold);min-height:1.35em}
+  #speechRef{font-size:17px;color:var(--ink-dim)}
+  #hint{font-size:clamp(20px,2.4vw,24px);line-height:1.4}
+  .bar{height:12px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7cc8ff,#8fe3ac);transition:width .2s}
+  #meta{display:flex;justify-content:space-between;align-items:center;font-size:19px;color:var(--ink-dim);gap:10px}
+  #dots{display:flex;gap:6px}
+  #dots b{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.18)}
+  #dots b.on{background:var(--gold)} #dots b.now{background:#fff}
+
+  #toast{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);z-index:6;font-size:clamp(28px,5vw,46px);color:var(--gold);text-align:center;text-shadow:0 3px 14px rgba(0,0,0,.8);max-width:90vw;pointer-events:none;opacity:0;transition:opacity .4s}
+  #toast.on{opacity:1}
+
+  #compass{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:4;display:flex;align-items:center;gap:10px;pointer-events:none}
+  #arrow{width:54px;height:54px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;font-size:30px;color:var(--gold)}
+  #dist{font-size:19px;background:var(--panel);border-radius:999px;padding:6px 12px;border:1px solid var(--line)}
+  #fruit{position:fixed;left:14px;top:58px;z-index:4;font-size:22px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 12px}
+
+  #act{position:fixed;right:18px;bottom:22px;z-index:5;min-width:170px;min-height:96px;padding:12px 22px;border:0;border-radius:26px;font-family:var(--font);font-size:26px;line-height:1.2;color:#2a1a08;background:radial-gradient(circle at 50% 25%,#fff0b8,#ffd76a 60%,#eaa93a);box-shadow:0 6px 0 #a8741f,0 0 26px rgba(255,215,106,.5);cursor:pointer;touch-action:manipulation}
+  #act:active{transform:translateY(4px);box-shadow:0 2px 0 #a8741f}
+  #stick{position:fixed;left:18px;bottom:22px;width:150px;height:150px;border-radius:50%;z-index:5;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.25);touch-action:none;display:none}
+  #knob{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(255,255,255,.35)}
+  @media (pointer:coarse){#stick{display:block}#keys{display:none}}
+  #keys{position:fixed;left:14px;bottom:14px;z-index:3;font-size:16px;color:var(--ink-dim);background:var(--panel);border-radius:12px;padding:6px 12px;pointer-events:none}
+
+  .ov{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(3,5,20,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  .card{width:min(780px,100%);max-height:100%;overflow:auto;background:rgba(10,14,44,.94);border:1px solid var(--line);border-radius:24px;padding:26px 30px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+  .eyebrow{font-size:19px;color:#ffb37a;letter-spacing:.08em}
+  h1{margin:0;font-weight:400;font-size:clamp(38px,8vw,60px);color:var(--gold);line-height:1.15}
+  h2{margin:0;font-weight:400;font-size:clamp(30px,5.5vw,44px);color:var(--gold);line-height:1.2}
+  h3{margin:0;font-weight:400;font-size:26px}
+  .card p{margin:0;font-size:clamp(22px,2.8vw,26px);line-height:1.6}
+  .ref{font-size:18px;color:var(--ink-dim)}
+  .btn{font-family:var(--font);font-size:27px;border:0;border-radius:16px;padding:16px 22px;cursor:pointer;color:#2a1a08;background:var(--gold);box-shadow:0 5px 0 #b88a2a;touch-action:manipulation}
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 #b88a2a}
+  .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);box-shadow:none}
+  .row{display:flex;gap:12px;flex-wrap:wrap}.row>.btn{flex:1 1 200px}
+  details{background:rgba(255,255,255,.07);border-radius:14px;padding:10px 16px}
+  summary{cursor:pointer;font-size:22px;color:var(--ink-dim)}
+  details ul{margin:10px 0 4px;padding-left:22px;line-height:1.7;font-size:20px}
+  ol.recap{margin:0;padding-left:0;list-style:none;display:grid;gap:8px}
+  ol.recap li{background:rgba(255,255,255,.07);border-radius:12px;padding:8px 14px;font-size:21px;line-height:1.45}
+  ol.recap b{color:var(--gold);font-weight:400}
+  .score{display:flex;gap:10px}.score div{flex:1;background:rgba(255,255,255,.07);border-radius:14px;padding:10px;text-align:center;font-size:19px;color:var(--ink-dim)}
+  .score b{display:block;font-size:34px;color:var(--gold);font-weight:400}
+  ol.talk{margin:0;padding-left:26px;line-height:1.8;font-size:22px}
+  @media (max-height:700px){#panel{top:52px;padding:10px 16px;gap:5px}#speechText{font-size:clamp(20px,3vw,26px)}#hint{font-size:19px}#speechLab,#speechRef{font-size:15px}}
+  #fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:15;transition:opacity 1.2s}
+  #nowebgl{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:#0b0e2a;text-align:center;padding:24px;font-size:26px;line-height:1.6}
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="3D 세상"></canvas>
+<div id="fade"></div>
+
+<div id="top">
+  <a class="chip" href="../">🏠 메인허브</a>
+  <span class="chip" id="dayChip">창조의 7일</span>
+  <div class="r">
+    <button class="chip" id="voiceBtn" type="button" aria-pressed="false">🗣️ 읽어주기 꺼짐</button>
+    <button class="chip" id="muteBtn" type="button" aria-pressed="false">🔊 소리 켜짐</button>
+  </div>
+</div>
+
+<div id="panel" hidden>
+  <span id="speechLab">하나님께서 말씀하세요</span>
+  <div id="speechText"></div>
+  <div id="speechRef"></div>
+  <div id="hint"></div>
+  <div class="bar"><i id="barFill"></i></div>
+  <div id="meta"><span id="count"></span><span id="dots"></span></div>
+</div>
+<div id="fruit" hidden>🍎 <span id="fruitN">0</span></div>
+<div id="compass" hidden><div id="arrow">▲</div><span id="dist"></span></div>
+<div id="toast" role="status"></div>
+<button id="act" type="button" hidden>🙌 행동</button>
+<div id="stick" aria-hidden="true"><div id="knob"></div></div>
+<div id="keys">WASD 이동 · 마우스 끌기 시야 · Space 행동</div>
+
+<!-- 시작 -->
+<div class="ov" id="ovTitle">
+  <div class="card">
+    <span class="eyebrow">창세기 1장 1절 – 2장 3절</span>
+    <h1>창조의 7일</h1>
+    <p>하나님이 말씀하시면 세상이 만들어져요. <b>말씀을 잘 듣고</b> 그대로 해 보아요! 첫째 날부터 일곱째 날까지, 하루에 두 가지쯤 미션이 있어요.</p>
+    <button class="btn" id="startBtn" type="button">말씀을 들으러 가요</button>
+    <details>
+      <summary>선생님 안내</summary>
+      <ul>
+        <li>본문: 창세기 1:1–2:3. 성경 구절은 쉬운 말로 풀어 썼어요. 수업에서는 교회가 쓰는 번역본으로 함께 읽어 주세요.</li>
+        <li>하루마다 하나님의 말씀(지시)이 나오고, 그 말씀대로 세상 곳곳에서 미션을 해요. 전체 약 20~30분.</li>
+        <li>이동은 WASD·방향키, 시야는 마우스 끌기(태블릿은 화면 끌기), 행동은 Space나 오른쪽 아래 버튼이에요.</li>
+        <li>TV·프로젝터로 할 때는 팀이 하루씩 맡거나, 한 명은 조종·한 명은 말씀 읽기로 나눠 보세요. 화면 위 “읽어주기”를 켜면 기기가 말씀을 소리 내어 읽어 줘요.</li>
+        <li>각 날이 끝나면 “저녁이 되고 아침이 되니 ○째 날이라”를 함께 읽어 보세요. 마지막 화면에 나눔 질문이 있어요.</li>
+      </ul>
+    </details>
+  </div>
+</div>
+
+<!-- 날 시작 -->
+<div class="ov" id="ovDay" hidden>
+  <div class="card">
+    <span class="eyebrow" id="dayEye"></span>
+    <h2 id="dayTitle"></h2>
+    <p id="dayVerse"></p>
+    <span class="ref" id="dayRef"></span>
+    <button class="btn" id="dayGo" type="button">말씀대로 하러 가기</button>
+  </div>
+</div>
+
+<!-- 날 끝 -->
+<div class="ov" id="ovClose" hidden>
+  <div class="card">
+    <span class="eyebrow" id="closeEye"></span>
+    <h2 id="closeTitle"></h2>
+    <p id="closeText"></p>
+    <span class="ref" id="closeRef"></span>
+    <button class="btn" id="closeGo" type="button">다음 날로</button>
+  </div>
+</div>
+
+<!-- 끝 -->
+<div class="ov" id="ovEnd" hidden>
+  <div class="card">
+    <span class="eyebrow">창세기 2장 1–3절</span>
+    <h2>하나님이 지으신 모든 것이 아주 좋았어요!</h2>
+    <p>일곱째 날, 하나님은 하시던 일을 다 마치고 쉬셨어요. 그리고 이 날을 복 주시고 거룩하게 하셨어요.</p>
+    <ol class="recap" id="recap"></ol>
+    <div class="score"><div><b id="endStages">0</b>말씀대로 한 일</div><div><b id="endTime">0</b>걸린 시간(분)</div></div>
+    <h3>함께 이야기해 봐요</h3>
+    <ol class="talk">
+      <li>하나님은 “~있으라” 하고 말씀만 하셨어요. 내가 가장 신기했던 날은 언제였나요?</li>
+      <li>하나님이 만드신 것들 중 내가 잘 돌보고 싶은 것은 무엇인가요? 오늘 하나님께 무엇이라고 감사할까요?</li>
+    </ol>
+    <div class="row"><button class="btn" id="againBtn" type="button">처음부터 다시</button><a class="btn ghost" href="../" style="text-decoration:none;text-align:center">🏠 메인허브</a></div>
+  </div>
+</div>
+
+<div id="nowebgl">이 기기에서는 3D 화면을 열 수 없어요.<br>다른 브라우저(크롬 등)로 열어 주세요.<br><a class="chip" href="../">🏠 메인허브</a></div>
+
+<script src="lib/three.min.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ================= 수학 도우미 ================= */
+  const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const rnd = (a = 0, b = 1) => a + Math.random() * (b - a);
+  const approach = (v, t, d) => v < t ? Math.min(t, v + d) : Math.max(t, v - d);
+  const pick = a => a[(Math.random() * a.length) | 0];
+
+  /* ================= 상태 ================= */
+  const S = {
+    light: 0, lightT: 0, open: 0, openT: 0, landK: 0, landT: 0, greenK: 0, greenT: 0,
+    tod: 0.25, cycle: false, dayLen: 40, nightBlend: 0, nightT: 0,
+    hasSun: false, hasMoon: false, hasStars: false,
+    fruit: 0, resting: 0, paused: true, stages: 0, t0: 0
+  };
+  const St = { day: -1, stage: -1, total: 1, done: 0, def: null, locked: false, tick: null };
+  const HUB_Y = 1.2;
+
+  /* ================= 지형 ================= */
+  const SEAS = [[70, -40, 38], [-65, 50, 34]];
+  function hFinal(x, z) {
+    const r = Math.hypot(x, z);
+    let h = 2.2 + 2.6 * Math.sin(x * 0.045 + 1.3) * Math.cos(z * 0.05) + 1.4 * Math.sin(x * 0.11 + z * 0.09) + 0.7 * Math.sin(z * 0.21 - x * 0.13);
+    for (const [sx, sz, sr] of SEAS) { const d = Math.hypot(x - sx, z - sz) / sr; h -= 9 * Math.exp(-d * d * 1.6); }
+    h -= Math.max(0, r - 105) * 0.35;
+    const t = smooth(12, 32, r);
+    return HUB_Y * (1 - t) + h * t;
+  }
+  const hSunk = (x, z) => -4 + 5.2 * (1 - smooth(10, 17, Math.hypot(x, z)));
+  const hNow = (x, z) => { const s = hSunk(x, z); return s + (hFinal(x, z) - s) * S.landK; };
+
+  /* ================= three.js 기본 ================= */
+  const canvas = $('gl');
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  } catch (e) { $('nowebgl').style.display = 'flex'; return; }
+  renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1));
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x000000, 4, 38);
+  const camera = new THREE.PerspectiveCamera(62, 1, 0.3, 700);
+  const hemi = new THREE.HemisphereLight(0xbfd8ff, 0x556040, 0);
+  const sunLight = new THREE.DirectionalLight(0xfff0d0, 0);
+  scene.add(hemi, sunLight, sunLight.target);
+  const lantern = new THREE.PointLight(0xffdca0, 1.2, 18, 1.4);
+  scene.add(lantern);
+
+  function resize() {
+    const w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  addEventListener('resize', resize); resize();
+
+  const glowTex = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,.45)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(c);
+  })();
+  function glow(color, size) {
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, transparent: true }));
+    s.scale.setScalar(size); return s;
+  }
+  const lam = (c, o = {}) => new THREE.MeshLambertMaterial(Object.assign({ color: c }, o));
+  const basic = (c, o = {}) => new THREE.MeshBasicMaterial(Object.assign({ color: c, fog: false }, o));
+
+  /* 땅 */
+  const SEG = 100, SIZE = 300;
+  const tGeo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG); tGeo.rotateX(-Math.PI / 2);
+  const tPos = tGeo.attributes.position, tN = tPos.count;
+  const hF = new Float32Array(tN), hS = new Float32Array(tN);
+  for (let i = 0; i < tN; i++) { const x = tPos.getX(i), z = tPos.getZ(i); hF[i] = hFinal(x, z); hS[i] = hSunk(x, z); }
+  tGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(tN * 3), 3));
+  const tCol = tGeo.attributes.color;
+  const terrain = new THREE.Mesh(tGeo, new THREE.MeshLambertMaterial({ vertexColors: true }));
+  scene.add(terrain);
+  function rebuildTerrain() {
+    const k = S.landK, gk = S.greenK;
+    for (let i = 0; i < tN; i++) {
+      const h = hS[i] + (hF[i] - hS[i]) * k;
+      tPos.setY(i, h);
+      let r, g, b;
+      if (h < -0.2) { r = .16; g = .24; b = .30; }
+      else if (h < 0.9) { r = lerp(.85, .55, gk * .5); g = lerp(.76, .72, gk * .5); b = lerp(.55, .40, gk * .5); }
+      else {
+        const x = tPos.getX(i), z = tPos.getZ(i), n = Math.sin(x * .3) * Math.sin(z * .27) * .5 + .5;
+        r = lerp(.60, .30 + .08 * n, gk); g = lerp(.52, .62 + .1 * n, gk); b = lerp(.40, .28, gk);
+        const rk = smooth(5.8, 7.5, h); r = lerp(r, .55, rk); g = lerp(g, .55, rk); b = lerp(b, .58, rk);
+      }
+      tCol.setXYZ(i, r, g, b);
+    }
+    tPos.needsUpdate = true; tCol.needsUpdate = true; tGeo.computeVertexNormals();
+  }
+  rebuildTerrain();
+
+  /* 물 */
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(900, 900).rotateX(-Math.PI / 2),
+    new THREE.MeshPhongMaterial({ color: 0x2d7fd0, transparent: true, opacity: 0.84, shininess: 90, specular: 0x88bbff }));
+  scene.add(water);
+
+  /* 하늘 물건(해·달·별) */
+  const skyG = new THREE.Group(); scene.add(skyG);
+  const sunM = new THREE.Group(); sunM.add(new THREE.Mesh(new THREE.SphereGeometry(9, 24, 16), basic(0xfff1b0)), glow(0xffd070, 90));
+  const moonM = new THREE.Group(); moonM.add(new THREE.Mesh(new THREE.SphereGeometry(6, 24, 16), basic(0xe8ecff)), glow(0x9db4ff, 50));
+  sunM.visible = moonM.visible = false; skyG.add(sunM, moonM);
+  const starPts = (() => {
+    const n = 420, arr = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const u = Math.random() * 6.2832, v = Math.random() * 1.35 + 0.05, R = 300;
+      arr[i * 3] = Math.cos(u) * Math.cos(v) * R; arr[i * 3 + 1] = Math.sin(v) * R; arr[i * 3 + 2] = Math.sin(u) * Math.cos(v) * R;
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+    const p = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size: 2.6, sizeAttenuation: false, transparent: true, opacity: 0, fog: false, depthWrite: false }));
+    p.visible = false; skyG.add(p); return p;
+  })();
+
+  /* 구름(위의 물) */
+  const cloudMat = new THREE.MeshLambertMaterial({ color: 0x59606a });
+  const clouds = [];
+  for (let i = 0; i < 30; i++) {
+    const g = new THREE.Group();
+    for (let j = 0; j < 4; j++) {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(rnd(7, 11), 10, 8), cloudMat);
+      m.position.set((j - 1.5) * 8 + rnd(-2, 2), rnd(-1.5, 1.5), rnd(-4, 4)); m.scale.y = 0.55; g.add(m);
+    }
+    const a = rnd(0, 6.283), r = rnd(25, 150);
+    g.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+    g.userData = { off: rnd(-2, 8), drift: rnd(0.5, 1.6) };
+    scene.add(g); clouds.push(g);
+  }
+
+  /* ================= 플레이어 ================= */
+  const player = new THREE.Group(); scene.add(player);
+  (() => {
+    const robe = new THREE.Mesh(new THREE.CylinderGeometry(.34, .62, 1.5, 14), lam(0xf4e6c6)); robe.position.y = .8;
+    const sash = new THREE.Mesh(new THREE.CylinderGeometry(.46, .5, .18, 14), lam(0xd9822b)); sash.position.y = 1.0;
+    const head = new THREE.Mesh(new THREE.SphereGeometry(.34, 16, 12), lam(0xf0c8a0)); head.position.y = 1.85;
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(.36, 16, 12, 0, 6.283, 0, 1.5), lam(0x4a2f1a)); hair.position.y = 1.9;
+    player.add(robe, sash, head, hair);
+  })();
+  player.position.set(0, HUB_Y, 4);
+  const P = { yaw: 0, face: Math.PI, pitch: 0.42, dist: 11, walk: 0 };
+
+  /* ================= 효과(반짝임) ================= */
+  const bursts = [];
+  function burst(pos, color = 0xffe9a0, n = 36) {
+    const arr = new Float32Array(n * 3), vel = [];
+    for (let i = 0; i < n; i++) { arr[i * 3] = pos.x; arr[i * 3 + 1] = pos.y + 1; arr[i * 3 + 2] = pos.z; vel.push(new THREE.Vector3(rnd(-4, 4), rnd(2, 7), rnd(-4, 4))); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+    const p = new THREE.Points(g, new THREE.PointsMaterial({ color, size: 0.55, transparent: true, opacity: 1, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+    scene.add(p); bursts.push({ p, vel, life: 1.4 });
+  }
+  const grows = [], anims = [];
+  function grow(obj, dur = 1.6, from = 0.05) { obj.scale.setScalar(from); grows.push({ obj, t: 0, dur, from }); }
+
+  /* ================= 소리 ================= */
+  let ac = null, muted = false, voiceOn = false;
+  function tone(f, d = .1, type = 'sine', v = .1, delay = 0) {
+    if (muted) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.value = f; g.gain.setValueAtTime(v, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + d);
+      o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + d + .02);
+    } catch (e) {}
+  }
+  const sfx = {
+    pick: () => { tone(880, .09, 'triangle', .1); tone(1175, .12, 'triangle', .08, .07); },
+    act: () => { tone(330, .12, 'triangle', .1); tone(494, .16, 'triangle', .09, .08); },
+    good: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .22, 'triangle', .1, i * .1)),
+    voice: () => { tone(196, .5, 'sine', .08); tone(294, .6, 'sine', .06, .12); },
+    fan: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, .28, 'triangle', .1, i * .14))
+  };
+  $('muteBtn').onclick = () => { muted = !muted; $('muteBtn').textContent = muted ? '🔇 소리 꺼짐' : '🔊 소리 켜짐'; $('muteBtn').setAttribute('aria-pressed', String(muted)); };
+  const synth = window.speechSynthesis;
+  if (!synth) $('voiceBtn').hidden = true;
+  $('voiceBtn').onclick = () => {
+    voiceOn = !voiceOn; $('voiceBtn').textContent = voiceOn ? '🗣️ 읽어주기 켜짐' : '🗣️ 읽어주기 꺼짐';
+    $('voiceBtn').setAttribute('aria-pressed', String(voiceOn));
+    if (voiceOn) speak($('speechText').textContent); else synth && synth.cancel();
+  };
+  function speak(t) {
+    if (!voiceOn || !synth || !t) return;
+    synth.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'ko-KR'; u.rate = 0.9; synth.speak(u);
+  }
+
+  /* ================= 자리(상호작용 지점) ================= */
+  const spots = [];
+  const ringGeo = new THREE.RingGeometry(1.1, 1.55, 40).rotateX(-Math.PI / 2);
+  const beamGeo = new THREE.CylinderGeometry(.32, .32, 16, 12, 1, true);
+  function addSpot(o) {
+    const it = Object.assign({ r: 3, kind: 'act', color: 0xffd76a, beacon: true, ring: true, temp: false, used: false, label: '행동', can: null, tick: null }, o);
+    const y = it.y !== undefined ? it.y : hNow(it.x, it.z);
+    it.g = new THREE.Group(); it.g.position.set(it.x, y, it.z); scene.add(it.g);
+    it.marker = new THREE.Group(); it.g.add(it.marker);
+    if (it.ring) { const m = new THREE.Mesh(ringGeo, basic(it.color, { transparent: true, opacity: .85, side: THREE.DoubleSide, depthWrite: false })); m.position.y = 0.08; m.scale.setScalar(it.r / 2.4 + .4); it.marker.add(m); it.ringM = m; }
+    if (it.beacon) { const b = new THREE.Mesh(beamGeo, basic(it.color, { transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); b.position.y = 8; it.marker.add(b); }
+    if (it.build) it.build(it.g, it);
+    spots.push(it); return it;
+  }
+  function retire(it) {
+    it.used = true; it.g.remove(it.marker);
+    if (it.temp) scene.remove(it.g);
+  }
+  function clearSpots() { for (const it of spots) if (!it.used) retire(it); spots.length = 0; }
+  const spotY = it => it.g.position.y;
+
+  /* ================= 물건 만들기 ================= */
+  function orb(color, size = .5) {
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(size, 16, 12), basic(color)), glow(color, size * 9));
+    return g;
+  }
+  function cloudPuff(scale = 1) {
+    const g = new THREE.Group(), m = lam(0xffffff);
+    [[0, 0, 0, 1.2], [1.1, -.2, .3, .9], [-1.1, -.15, -.2, .95], [.3, .5, -.4, .8]].forEach(([x, y, z, s]) => {
+      const p = new THREE.Mesh(new THREE.SphereGeometry(s, 10, 8), m); p.position.set(x, y, z); g.add(p);
+    });
+    g.scale.setScalar(scale); return g;
+  }
+  const trees = [];
+  function makeTree() {
+    const g = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.3, .5, 3, 8), lam(0x7a4d2a)); trunk.position.y = 1.5; g.add(trunk);
+    const leaf = lam(0x2f8f3a);
+    [[0, 4.2, 0, 2.1], [1.2, 3.6, .4, 1.5], [-1.1, 3.7, -.3, 1.5], [.2, 5.3, .2, 1.4]].forEach(([x, y, z, s]) => {
+      const p = new THREE.Mesh(new THREE.IcosahedronGeometry(s, 1), leaf); p.position.set(x, y, z); g.add(p);
+    });
+    g.userData.fruits = [];
+    for (let i = 0; i < 6; i++) {
+      const a = i * 1.05 + .3, f = new THREE.Mesh(new THREE.SphereGeometry(.28, 10, 8), basic(0xe5382e, { fog: true }));
+      f.position.set(Math.cos(a) * 2.0, 3.4 + (i % 3) * .55, Math.sin(a) * 2.0); g.add(f); g.userData.fruits.push(f);
+    }
+    return g;
+  }
+  function tuft() {
+    const g = new THREE.Group(), gm = [lam(0x3fae46), lam(0x5fc75a), lam(0x2f8f3a)];
+    for (let i = 0; i < 9; i++) {
+      const c = new THREE.Mesh(new THREE.ConeGeometry(.12, rnd(.7, 1.3), 5), pick(gm));
+      c.position.set(rnd(-.8, .8), .5, rnd(-.8, .8)); c.rotation.set(rnd(-.3, .3), 0, rnd(-.3, .3)); g.add(c);
+    }
+    const fl = new THREE.Mesh(new THREE.SphereGeometry(.16, 8, 6), lam(pick([0xff7aa8, 0xffd23f, 0xffffff, 0xb28dff])));
+    fl.position.set(rnd(-.4, .4), 1.1, rnd(-.4, .4)); g.add(fl);
+    return g;
+  }
+
+  /* 동물 */
+  const critters = [];   // {g, home, r, target, speed, kind, t}
+  function makeAnimal(kind) {
+    const g = new THREE.Group(), body = new THREE.Group(); g.add(body);
+    const add = (geo, mat, x, y, z, sx = 1, sy = 1, sz = 1) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.scale.set(sx, sy, sz); body.add(m); return m; };
+    if (kind === 'snake') {
+      const m = lam(0x4a9a3a), m2 = lam(0xe8c84a);
+      for (let i = 0; i < 10; i++) add(new THREE.SphereGeometry(.24 - i * .008, 8, 6), i % 2 ? m : m2, 0, .24, -i * .34);
+      add(new THREE.SphereGeometry(.3, 10, 8), m, 0, .28, .3);
+      body.userData.segs = body.children.slice(0, 10);
+    } else {
+      const cfg = { sheep: [0xf4f4f0, 0x2b2b2b, 1.0], cow: [0x8a5a34, 0xf0e8e0, 1.4], lion: [0xd9a441, 0x8a5a1c, 1.3] }[kind];
+      const [bc, hc, s] = cfg, bm = lam(bc), hm = lam(hc);
+      add(kind === 'sheep' ? new THREE.SphereGeometry(.7, 12, 10) : new THREE.BoxGeometry(.9, .8, 1.6), bm, 0, 1.0 * s, 0, kind === 'sheep' ? 1 : 1, 1, kind === 'sheep' ? 1.2 : 1);
+      add(new THREE.BoxGeometry(.5, .5, .55), hm, 0, 1.25 * s, .95);
+      if (kind === 'lion') add(new THREE.SphereGeometry(.55, 10, 8), hm, 0, 1.3 * s, .78);
+      if (kind === 'cow') { add(new THREE.BoxGeometry(.7, .05, .05), lam(0xffffff), 0, 1.55 * s, .95); add(new THREE.SphereGeometry(.3, 8, 6), lam(0xf0e8e0), .25, 1.05 * s, .1); }
+      [[-.3, .5], [.3, .5], [-.3, -.5], [.3, -.5]].forEach(([x, z]) => add(new THREE.CylinderGeometry(.1, .1, .8 * s, 6), hm, x, .4 * s, z));
+    }
+    return g;
+  }
+  function spawnAnimals(kind, x, z, n) {
+    for (let i = 0; i < n; i++) {
+      const g = makeAnimal(kind), a = rnd(0, 6.28), r = rnd(1.5, 4);
+      const px = x + Math.cos(a) * r, pz = z + Math.sin(a) * r;
+      g.position.set(px, hNow(px, pz), pz); scene.add(g); grow(g, 1.2, 0.1);
+      critters.push({ g, home: { x, z }, target: { x: px, z: pz }, speed: kind === 'snake' ? 1.3 : kind === 'lion' ? 2.2 : 1.6, kind, t: rnd(0, 9), wait: 0 });
+    }
+    burst(new THREE.Vector3(x, hNow(x, z), z), 0xfff0c0);
+  }
+
+  /* 사람 */
+  const humans = [];
+  function makeHuman(robeColor, hairColor, tall) {
+    const g = new THREE.Group();
+    const robe = new THREE.Mesh(new THREE.CylinderGeometry(.3, .62, 1.5 * tall, 14), lam(robeColor)); robe.position.y = .75 * tall;
+    const head = new THREE.Mesh(new THREE.SphereGeometry(.34, 16, 12), lam(0xf0c8a0)); head.position.y = 1.5 * tall + .35;
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(.37, 16, 12, 0, 6.283, 0, 1.6), lam(hairColor)); hair.position.y = 1.5 * tall + .4;
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(.42, .04, 8, 24), basic(0xffe9a0)); halo.rotation.x = Math.PI / 2; halo.position.y = 1.5 * tall + .95;
+    g.add(robe, head, hair, halo, glow(0xffe9a0, 6));
+    return g;
+  }
+
+  /* 물고기·새 */
+  const schools = [], flocks = [];
+  function makeFish(color) {
+    const g = new THREE.Group(), m = lam(color);
+    const b = new THREE.Mesh(new THREE.SphereGeometry(.5, 10, 8), m); b.scale.set(1.6, .7, .6);
+    const t = new THREE.Mesh(new THREE.ConeGeometry(.35, .6, 6), m); t.rotation.z = Math.PI / 2; t.position.x = -.95;
+    g.add(b, t); return g;
+  }
+  function makeSchool(cx, cz, n) {
+    const fish = [];
+    for (let i = 0; i < n; i++) {
+      const g = makeFish(pick([0xff8a3d, 0xffc93d, 0x4db7ff, 0xf25c8f])); scene.add(g);
+      fish.push({ g, a: rnd(0, 6.28), rad: rnd(2, 7), sp: rnd(.5, 1) * (Math.random() < .5 ? 1 : -1), ph: rnd(0, 6.28) });
+    }
+    const s = { cx, cz, fish, want: n, t: 0 }; schools.push(s); return s;
+  }
+  function makeBird() {
+    const g = new THREE.Group(), m = lam(0xffffff, { side: THREE.DoubleSide }), tip = lam(0xffd07a);
+    const body = new THREE.Mesh(new THREE.SphereGeometry(.35, 8, 6), tip); body.scale.set(1.6, .8, .8);
+    const wing = new THREE.PlaneGeometry(1.3, .55);
+    const l = new THREE.Mesh(wing, m), r = new THREE.Mesh(wing, m);
+    l.position.set(0, 0, .75); r.position.set(0, 0, -.75); l.rotation.x = r.rotation.x = Math.PI / 2;
+    g.add(body, l, r); g.userData = { l, r }; return g;
+  }
+  function makeFlock(cx, cz, n) {
+    const birds = [];
+    for (let i = 0; i < n; i++) { const g = makeBird(); scene.add(g); birds.push({ g, a: rnd(0, 6.28), rad: rnd(5, 15), sp: rnd(.35, .6), alt: rnd(11, 20), ph: rnd(0, 6.28) }); }
+    flocks.push({ cx, cz, birds });
+  }
+
+  /* 장식 풀(3일차) */
+  let decor = null, decorT = 0;
+  function scatterDecor() {
+    const N = 520, geo = new THREE.ConeGeometry(.16, 1, 5);
+    decor = new THREE.InstancedMesh(geo, lam(0xffffff), N);
+    decor.userData.items = [];
+    const col = new THREE.Color(), gc = [0x3fae46, 0x5fc75a, 0x2f8f3a, 0x79d05a];
+    for (let i = 0; i < N; i++) {
+      let x, z, tries = 0;
+      do { const a = rnd(0, 6.28), r = rnd(6, 98); x = Math.cos(a) * r; z = Math.sin(a) * r; tries++; } while (hFinal(x, z) < 1.1 && tries < 30);
+      decor.userData.items.push({ x, z, s: rnd(.7, 1.6) });
+      decor.setColorAt(i, col.set(pick(gc)));
+    }
+    decor.instanceColor.needsUpdate = true; scene.add(decor); decorT = 0;
+  }
+  const dM = new THREE.Matrix4(), dQ = new THREE.Quaternion(), dP = new THREE.Vector3(), dS = new THREE.Vector3();
+  function updateDecor(dt) {
+    if (!decor || decorT >= 1) return;
+    decorT = Math.min(1, decorT + dt / 2.5);
+    decor.userData.items.forEach((it, i) => {
+      const k = Math.min(1, Math.max(0, decorT * 1.4 - (i % 10) * .04));
+      dP.set(it.x, hFinal(it.x, it.z) + .5 * it.s * k, it.z); dS.set(1, it.s * k + .001, 1);
+      dM.compose(dP, dQ, dS); decor.setMatrixAt(i, dM);
+    });
+    decor.instanceMatrix.needsUpdate = true;
+  }
+
+  /* ================= 화면(HUD) ================= */
+  const DAY_NAMES = ['첫째 날', '둘째 날', '셋째 날', '넷째 날', '다섯째 날', '여섯째 날', '일곱째 날'];
+  let twTimer = 0;
+  function setSpeech(text, ref) {
+    clearInterval(twTimer); $('speechRef').textContent = ref;
+    const el = $('speechText');
+    if (reduceMotion) el.textContent = text;
+    else { let i = 0; el.textContent = ''; twTimer = setInterval(() => { el.textContent = text.slice(0, ++i); if (i >= text.length) clearInterval(twTimer); }, 34); }
+    speak(text); sfx.voice();
+  }
+  let toastT = 0;
+  function toast(t, ms = 2600) {
+    const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT);
+    toastT = setTimeout(() => el.classList.remove('on'), ms);
+  }
+  let lastPct = -1;
+  function updateHud() {
+    if (!St.def) return;
+    $('hint').textContent = St.def.hint;
+    const pct = St.total ? St.done / St.total : 0;
+    $('barFill').style.width = (pct * 100) + '%';
+    $('count').textContent = St.def.unit ? `${St.def.unit} ${St.done} / ${St.total}` : '';
+    const n = DAYS[St.day].stages.length;
+    $('dots').innerHTML = Array.from({ length: n }, (_, i) => `<b class="${i < St.stage ? 'on' : i === St.stage ? 'now' : ''}"></b>`).join('');
+    $('fruit').hidden = !(S.fruit > 0 || (St.def && St.def.showFruit)); $('fruitN').textContent = S.fruit;
+  }
+  const overlayOpen = () => ['ovTitle', 'ovDay', 'ovClose', 'ovEnd'].some(id => !$(id).hidden);
+  function setOv(id, on) { $(id).hidden = !on; S.paused = overlayOpen(); if (on) { const b = $(id).querySelector('button.btn'); b && setTimeout(() => b.focus({ preventScroll: true }), 60); } }
+
+  /* ================= 미션 진행 ================= */
+  function progress(n = 1) {
+    if (St.locked) return;
+    St.done = Math.min(St.total, St.done + n); updateHud();
+    if (St.done < St.total) return;
+    St.locked = true; S.stages++;
+    const def = St.def;
+    setTimeout(() => { def.done && def.done(); toast('✨ ' + def.good, 3400); sfx.good(); burst(player.position, 0xffe9a0, 60); }, 500);
+    setTimeout(nextStage, 4200);
+  }
+  function beginStage(i) {
+    const def = DAYS[St.day].stages[i];
+    St.stage = i; St.def = def; St.total = def.total; St.done = 0; St.locked = false; St.tick = null; lastPct = -1;
+    clearSpots();
+    setSpeech(def.say, def.ref);
+    updateHud();
+    def.start();
+  }
+  function nextStage() {
+    if (St.stage + 1 < DAYS[St.day].stages.length) beginStage(St.stage + 1); else endDay();
+  }
+  function startDay(d) {
+    St.day = d; St.stage = -1; St.def = null; clearSpots();
+    const D = DAYS[d];
+    $('dayChip').textContent = `${DAY_NAMES[d]} · ${D.title}`;
+    $('dayEye').textContent = `${D.ref}`; $('dayTitle').textContent = `${DAY_NAMES[d]} · ${D.title}`;
+    $('dayVerse').textContent = D.verse; $('dayRef').textContent = '';
+    $('panel').hidden = true; $('compass').hidden = true; $('fruit').hidden = true;
+    setOv('ovDay', true); sfx.voice();
+  }
+  function endDay() {
+    const D = DAYS[St.day];
+    clearSpots(); $('panel').hidden = true; $('compass').hidden = true; $('act').hidden = true;
+    $('closeEye').textContent = D.closeRef;
+    $('closeTitle').textContent = `${DAY_NAMES[St.day]}가 지났어요`;
+    $('closeText').textContent = D.close; $('closeRef').textContent = '';
+    const last = St.day === 6;
+    $('closeGo').textContent = last ? '마무리하기' : `${DAY_NAMES[St.day + 1]}로 →`;
+    $('fade').style.opacity = 0.7;
+    setOv('ovClose', true); sfx.fan();
+  }
+  $('startBtn').onclick = () => { S.t0 = performance.now(); setOv('ovTitle', false); startDay(0); tone(440, .1); };
+  $('dayGo').onclick = () => { setOv('ovDay', false); $('panel').hidden = false; beginStage(0); };
+  $('closeGo').onclick = () => {
+    $('fade').style.opacity = 0; setOv('ovClose', false);
+    if (St.day === 6) showEnd(); else startDay(St.day + 1);
+  };
+  function showEnd() {
+    $('recap').innerHTML = DAYS.map((d, i) => `<li><b>${DAY_NAMES[i]}</b> · ${d.title} — ${d.recap}</li>`).join('');
+    $('endStages').textContent = `${S.stages} / ${TOTAL_STAGES}`;
+    $('endTime').textContent = Math.max(1, Math.round((performance.now() - S.t0) / 60000));
+    $('panel').hidden = true; setOv('ovEnd', true); sfx.fan();
+  }
+  $('againBtn').onclick = () => location.reload();
+
+  /* ================= 하루하루 (말씀 + 미션) ================= */
+  const ang = (deg, r, cx = 0, cz = 0) => ({ x: cx + Math.cos(deg * Math.PI / 180) * r, z: cz + Math.sin(deg * Math.PI / 180) * r });
+
+  function findSpot(rMin, rMax, preds, avoid = [], minDist = 16) {
+    for (const pred of preds) {
+      for (let i = 0; i < 500; i++) {
+        const a = rnd(0, 6.283), r = rnd(rMin, rMax), x = Math.cos(a) * r, z = Math.sin(a) * r;
+        if (!pred(hFinal(x, z))) continue;
+        if (avoid.some(p => Math.hypot(p.x - x, p.z - z) < minDist)) continue;
+        return { x, z };
+      }
+    }
+    return { x: rMin, z: 0 };
+  }
+  function shoreSpot(cx, cz, tx, tz) {
+    const dx = tx - cx, dz = tz - cz, L = Math.hypot(dx, dz), ux = dx / L, uz = dz / L;
+    for (let d = 0; d < L; d += 1) {
+      const x = cx + ux * d, z = cz + uz * d;
+      if (hFinal(x, z) > 1.0) return { x: x + ux * 2, z: z + uz * 2, wx: x - ux * 7, wz: z - uz * 7 };
+    }
+    return { x: tx, z: tz, wx: cx, wz: cz };
+  }
+  const seedSpots = [], treeSpots = [], fishSpots = [], birdSpots = [];
+  let humanSpot = null;
+
+  const DAYS = [
+    /* ---------- 1 ---------- */
+    { title: '빛', ref: '창세기 1:1–5',
+      verse: '처음에 세상은 아무것도 없이 캄캄했어요. 하나님의 영이 물 위에 계셨어요. 하나님이 “빛이 있으라!” 하고 말씀하시니 빛이 생겼어요. 빛과 어둠을 나누시고, 빛은 낮, 어둠은 밤이라고 부르셨어요.',
+      close: '저녁이 되고 아침이 되니 첫째 날이에요.', closeRef: '창세기 1:5',
+      recap: '“빛이 있으라” 말씀하시니 빛이 생기고 낮과 밤이 나뉘었어요.',
+      stages: [
+        { say: '“빛이 있으라!”', ref: '창세기 1:3', hint: '캄캄한 곳에서 반짝이는 빛 조각 3개를 찾아 모아요.', unit: '빛 조각', total: 3,
+          good: '빛이 생겼어요! 보시기에 좋았어요. (1:4)',
+          start() {
+            const pts = [ang(rnd(0, 120), rnd(4, 8)), ang(rnd(120, 240), rnd(4, 8)), ang(rnd(240, 360), rnd(4, 8))];
+            pts.forEach(p => addSpot({ x: p.x, z: p.z, y: HUB_Y + 1.4, kind: 'auto', r: 1.9, color: 0xffe9a0, ring: false, beacon: false, temp: true, build: g => g.add(orb(0xffe9a0, .5)),
+              tick: (it, t) => { it.g.position.y = HUB_Y + 1.4 + Math.sin(t * 2 + it.x) * .3; },
+              onUse(it) { sfx.pick(); burst(it.g.position, 0xffe9a0, 24); retire(it); progress(); } }));
+          },
+          done() { S.lightT = 1; } },
+        { say: '“빛과 어둠을 나누어라.”', ref: '창세기 1:4–5', hint: '“낮” 발판과 “밤” 발판에 한 번씩 올라서 봐요. 빛은 낮, 어둠은 밤이에요.', unit: '발판', total: 2,
+          good: '빛을 낮, 어둠을 밤이라 부르셨어요! (1:5)',
+          start() {
+            [['낮', 200, 0xffd76a, 0], ['밤', 340, 0x6d7cff, 1]].forEach(([nm, deg, col, night]) => {
+              const p = ang(deg, 6.5); let stay = 0;
+              addSpot({ x: p.x, z: p.z, kind: 'zone', r: 2.3, color: col, label: nm,
+                build(g) { const d = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, .25, 24), lam(col)); d.position.y = .12; g.add(d); const o = orb(col, .35); o.position.y = 2.2; g.add(o); },
+                tick(it, t, dt, dist) {
+                  if (it.used) return;
+                  if (dist < it.r) { S.nightT = night; stay += dt; if (stay > .7) { it.used = true; sfx.act(); retire(it); progress(); } }
+                  else stay = 0;
+                } });
+            });
+          },
+          done() { S.nightT = 0; } }
+      ] },
+    /* ---------- 2 ---------- */
+    { title: '하늘', ref: '창세기 1:6–8',
+      verse: '하나님이 “물 가운데 넓은 하늘이 생겨서 물과 물을 나누어라!” 하고 말씀하셨어요. 그러자 하늘 아래의 물과 하늘 위의 물이 나뉘었어요. 하나님은 그 넓은 곳을 “하늘”이라고 부르셨어요.',
+      close: '저녁이 되고 아침이 되니 둘째 날이에요.', closeRef: '창세기 1:8',
+      recap: '넓은 하늘이 생겨 물이 아래와 위로 나뉘었어요.',
+      stages: [
+        { say: '“물 가운데 넓은 하늘이 생겨서, 물과 물을 나누어라!”', ref: '창세기 1:6', hint: '하늘 기둥 3개를 차례로 밀어 올려 낮게 눌린 하늘을 열어요.', unit: '하늘 기둥', total: 3,
+          good: '넓은 하늘이 열렸어요! 물이 아래와 위로 나뉘었어요. (1:7)',
+          start() {
+            [90, 210, 330].forEach(deg => {
+              const p = ang(deg, 8.5);
+              addSpot({ x: p.x, z: p.z, r: 3, color: 0x9be0ff, label: '하늘 밀어올리기',
+                build(g, it) { const m = new THREE.Mesh(new THREE.CylinderGeometry(.55, .7, 1.3, 12), lam(0x9be0ff, { emissive: 0x2a6f9a })); m.position.y = .65; g.add(m); it.pillar = m; },
+                onUse(it) { sfx.act(); S.openT = Math.min(1, S.openT + 1 / 3); it.pillar.scale.y = 5; it.pillar.position.y = 3.2; burst(it.g.position, 0x9be0ff, 30); retire(it); progress(); } });
+            });
+          } },
+        { say: '“하늘 위의 물은 구름이 되어라.”', ref: '창세기 1:7', hint: '땅에 내려앉은 구름 4개를 하늘 높이 올려 보내요.', unit: '구름', total: 4,
+          good: '하늘을 “하늘”이라 부르셨어요! (1:8)',
+          start() {
+            [45, 135, 225, 315].forEach(deg => {
+              const p = ang(deg, 6.5);
+              addSpot({ x: p.x, z: p.z, r: 3, color: 0xffffff, label: '구름 올려 보내기', y: HUB_Y,
+                build(g, it) { const c = cloudPuff(1); c.position.y = 1.6; g.add(c); it.cloud = c; },
+                onUse(it) { sfx.act(); let rise = 0; anims.push(dt => { rise += dt; it.cloud.position.y += dt * (2 + rise * 3); it.cloud.scale.multiplyScalar(1 + dt * .25); if (rise > 5) { scene.remove(it.g); return true; } }); retire(it); progress(); } });
+            });
+          } }
+      ] },
+    /* ---------- 3 ---------- */
+    { title: '땅과 식물', ref: '창세기 1:9–13',
+      verse: '하나님이 “하늘 아래 물이 한곳으로 모이고 마른 땅이 드러나라!” 하고 말씀하시니 그대로 되었어요. 마른 땅은 “땅”, 모인 물은 “바다”라고 부르셨어요. 또 땅에 풀과 씨 맺는 채소와 열매 맺는 나무가 자라게 하셨어요.',
+      close: '저녁이 되고 아침이 되니 셋째 날이에요.', closeRef: '창세기 1:13',
+      recap: '땅과 바다가 나뉘고, 풀과 채소와 열매 맺는 나무가 자랐어요.',
+      stages: [
+        { say: '“하늘 아래 물이 한곳으로 모이고, 마른 땅이 드러나라!”', ref: '창세기 1:9', hint: '물 모으는 샘 3곳에서 물을 한곳으로 모아요. 땅이 솟아올라요!', unit: '샘', total: 3,
+          good: '땅과 바다가 나뉘었어요. 보시기에 좋았어요! (1:10)',
+          start() {
+            [30, 150, 270].forEach(deg => {
+              const p = ang(deg, 8);
+              addSpot({ x: p.x, z: p.z, r: 3, color: 0x4db7ff, label: '물 모으기',
+                build(g) { const t = new THREE.Mesh(new THREE.TorusGeometry(1.1, .3, 8, 20), lam(0x8a8a90)); t.rotation.x = Math.PI / 2; t.position.y = .3; g.add(t); const w = new THREE.Mesh(new THREE.CircleGeometry(1.05, 20), basic(0x4db7ff)); w.rotation.x = -Math.PI / 2; w.position.y = .32; g.add(w); },
+                onUse(it) { sfx.act(); S.landT = Math.min(1, S.landT + 1 / 3); burst(it.g.position, 0x4db7ff, 30); retire(it); progress(); } });
+            });
+          } },
+        { say: '“땅은 풀과 씨 맺는 채소를 내어라!”', ref: '창세기 1:11', hint: '새로 생긴 땅의 씨앗 자리 4곳에 씨앗을 심어요. (반짝이는 빛기둥을 따라가요)', unit: '씨앗', total: 4,
+          good: '땅이 푸르게 덮였어요! (1:12)',
+          start() {
+            seedSpots.length = 0;
+            for (let i = 0; i < 4; i++) {
+              const p = findSpot(20, 60, [h => h > 1.7], seedSpots, 18); seedSpots.push(p);
+              addSpot({ x: p.x, z: p.z, r: 3.2, color: 0x7dff9a, label: '씨앗 심기',
+                build(g) { const m = new THREE.Mesh(new THREE.ConeGeometry(.9, .5, 10), lam(0x6b4a2b)); m.position.y = .2; g.add(m); },
+                onUse(it) { sfx.act(); const t = tuft(); it.g.add(t); grow(t, 1.4); S.greenT = Math.min(1, S.greenT + .25); burst(it.g.position, 0x7dff9a, 24); retire(it); progress(); } });
+            }
+          },
+          done() { scatterDecor(); } },
+        { say: '“땅은 열매 맺는 나무를 내어라!”', ref: '창세기 1:11–12', hint: '나무 심을 자리 3곳에 묘목을 심어요. 열매가 열려요!', unit: '나무', total: 3,
+          good: '열매 맺는 나무가 자랐어요. 보시기에 좋았어요! (1:12)',
+          start() {
+            treeSpots.length = 0;
+            for (let i = 0; i < 3; i++) {
+              const p = findSpot(28, 70, [h => h > 1.7], seedSpots.concat(treeSpots), 18); treeSpots.push(p);
+              addSpot({ x: p.x, z: p.z, r: 3.4, color: 0xff9f7a, label: '묘목 심기',
+                build(g) { const m = new THREE.Mesh(new THREE.ConeGeometry(.35, .9, 6), lam(0x3fae46)); m.position.y = .45; g.add(m); },
+                onUse(it) { sfx.act(); const tr = makeTree(); tr.position.copy(it.g.position); scene.add(tr); grow(tr, 2.2); trees.push({ g: tr, x: it.x, z: it.z }); scene.remove(it.g); it.temp = true; burst(it.g.position, 0xff9f7a, 30); retire(it); progress(); } });
+            }
+          } }
+      ] },
+    /* ---------- 4 ---------- */
+    { title: '해·달·별', ref: '창세기 1:14–19',
+      verse: '하나님이 “하늘에 빛나는 것들이 있어서 낮과 밤을 나누고, 날과 계절과 해를 알려 주어라!” 하고 말씀하셨어요. 그래서 큰 빛(해)은 낮을, 작은 빛(달)은 밤을 다스리게 하시고, 별들도 만드셨어요.',
+      close: '저녁이 되고 아침이 되니 넷째 날이에요.', closeRef: '창세기 1:19',
+      recap: '해와 달과 별을 만드셔서 낮과 밤, 날과 계절을 알게 하셨어요.',
+      stages: [
+        { say: '“하늘에 빛나는 것들이 있어서 낮과 밤을 나누어라!”', ref: '창세기 1:14', hint: '해·달·별 제단 3곳에서 하늘에 빛나는 것들을 띄워 올려요.', unit: '제단', total: 3,
+          good: '해와 달과 별이 하늘에 걸렸어요! (1:16–17)',
+          start() {
+            [[60, '☀️ 해 띄우기', 0xffd76a, 'sun'], [180, '🌙 달 띄우기', 0xdfe6ff, 'moon'], [300, '✨ 별 띄우기', 0x9db4ff, 'stars']].forEach(([deg, lb, col, kind]) => {
+              const p = ang(deg, 8.5);
+              addSpot({ x: p.x, z: p.z, r: 3, color: col, label: lb,
+                build(g) { const m = new THREE.Mesh(new THREE.CylinderGeometry(.9, 1.1, 1, 12), lam(0x9a9aa4)); m.position.y = .5; g.add(m); const o = orb(col, .45); o.position.y = 1.9; g.add(o); },
+                onUse(it) {
+                  sfx.act(); burst(it.g.position, col, 40); retire(it);
+                  if (kind === 'sun') { S.hasSun = true; sunM.visible = true; sunM.scale.setScalar(.01); }
+                  if (kind === 'moon') { S.hasMoon = true; moonM.visible = true; moonM.scale.setScalar(.01); }
+                  if (kind === 'stars') { S.hasStars = true; starPts.visible = true; }
+                  progress();
+                } });
+            });
+          } },
+        { say: '“날과 계절과 해를 알려 주어라. 낮은 해가, 밤은 달과 별이 다스려라.”', ref: '창세기 1:14–18', hint: '해가 지고 다시 뜨는 하루를 지켜봐요. 그동안 세상을 걸어 다녀도 좋아요.', unit: '하루', total: 100,
+          good: '낮과 밤이 되풀이돼요. 보시기에 좋았어요! (1:18)',
+          start() { S.tod = 0.25; S.cycle = true; S.dayLen = 36; let acc = 0; St.tick = dt => { acc += dt / S.dayLen; const p = Math.min(100, Math.floor(acc * 100)); if (p !== lastPct) { lastPct = p; St.done = p; updateHud(); } if (acc >= 1 && !St.locked) { St.done = 99; progress(1); } }; },
+          done() { S.dayLen = 100; } }
+      ] },
+    /* ---------- 5 ---------- */
+    { title: '물고기와 새', ref: '창세기 1:20–23',
+      verse: '하나님이 “물에는 생물이 가득하고, 땅 위 하늘에는 새들이 날아다녀라!” 하고 말씀하셨어요. 큰 바다 동물과 물고기와 새들을 만드시고 복을 주셨어요. “생육하고 번성하여 바닷물에 가득하고 새들도 땅에서 번성하라.”',
+      close: '저녁이 되고 아침이 되니 다섯째 날이에요.', closeRef: '창세기 1:23',
+      recap: '물고기와 새를 만드시고 “번성하라” 복을 주셨어요.',
+      stages: [
+        { say: '“물에는 살아 있는 생물이 가득하여라!”', ref: '창세기 1:20', hint: '바닷가 3곳에서 물고기 떼를 풀어 주어요. (반짝이는 빛기둥을 따라가요)', unit: '바다', total: 3,
+          good: '바다에 물고기가 가득해요. 보시기에 좋았어요! (1:21)',
+          start() {
+            fishSpots.length = 0;
+            const targets = [[SEAS[0][0], SEAS[0][1]], [SEAS[1][0], SEAS[1][1]], [Math.cos(2.1) * 135, Math.sin(2.1) * 135]];
+            targets.forEach(([cx, cz]) => {
+              const s = shoreSpot(cx, cz, 0, 0); fishSpots.push(s);
+              addSpot({ x: s.x, z: s.z, r: 3.6, color: 0x4db7ff, label: '🐟 물고기 풀기',
+                onUse(it) { sfx.act(); const sc = makeSchool(s.wx, s.wz, 7); burst(it.g.position, 0x4db7ff, 40); retire(it); progress(); setTimeout(() => { sc.want = 16; toast('“번성하라!” 물고기가 늘어나요 (1:22)', 2600); }, 900); } });
+            });
+          } },
+        { say: '“새들은 땅 위 하늘에서 날아다녀라!”', ref: '창세기 1:20', hint: '높은 언덕 3곳에서 새들을 하늘로 날려 보내요.', unit: '새 떼', total: 3,
+          good: '하나님이 복을 주셨어요. “생육하고 번성하라!” (1:22)',
+          start() {
+            birdSpots.length = 0;
+            for (let i = 0; i < 3; i++) {
+              const p = findSpot(28, 85, [h => h > 4.2, h => h > 3.4, h => h > 1.7], birdSpots, 22); birdSpots.push(p);
+              addSpot({ x: p.x, z: p.z, r: 3.4, color: 0xffc46a, label: '🕊️ 새 날리기',
+                onUse(it) { sfx.act(); makeFlock(it.x, it.z, 6); burst(it.g.position, 0xffc46a, 40); retire(it); progress(); } });
+            }
+          } }
+      ] },
+    /* ---------- 6 ---------- */
+    { title: '짐승과 사람', ref: '창세기 1:24–31',
+      verse: '하나님이 “땅은 가축과 기어 다니는 것과 들짐승을 내어라!” 하고 말씀하시니 그대로 되었어요. 그리고 “우리 모습을 닮은 사람을 만들자” 하시고, 남자와 여자를 만드셨어요. 하나님은 사람에게 온 땅을 돌보게 하시고 먹을 것도 주셨어요.',
+      close: '저녁이 되고 아침이 되니 여섯째 날이에요.', closeRef: '창세기 1:31',
+      recap: '땅의 동물들과, 하나님을 닮은 남자와 여자를 만드셨어요.',
+      stages: [
+        { say: '“땅은 가축과 기어 다니는 것과 들짐승을 내어라!”', ref: '창세기 1:24', hint: '동물 자리 4곳에서 양·소·사자·뱀을 불러 주어요.', unit: '동물', total: 4,
+          good: '땅에 동물들이 가득해요. 보시기에 좋았어요! (1:25)',
+          start() {
+            const used = seedSpots.concat(treeSpots), got = [];
+            [['sheep', '🐑 양 부르기', 3], ['cow', '🐄 소 부르기', 2], ['lion', '🦁 사자 부르기', 2], ['snake', '🐍 기는 것 부르기', 2]].forEach(([kind, lb, n]) => {
+              const p = findSpot(20, 75, [h => h > 1.7], used.concat(got), 16); got.push(p);
+              addSpot({ x: p.x, z: p.z, r: 3.4, color: 0xffb066, label: lb,
+                onUse(it) { sfx.act(); spawnAnimals(kind, it.x, it.z, n); retire(it); progress(); } });
+            });
+          } },
+        { say: '“우리 모습을 닮은 사람을 만들자!”', ref: '창세기 1:26–27', hint: '흙 언덕의 “사람 자리”에서 남자와 여자를 차례로 만들어요.', unit: '사람', total: 2,
+          good: '하나님은 남자와 여자를 만드시고 복을 주셨어요. (1:27–28)',
+          start() {
+            const p = ang(0, 6); humanSpot = p; let made = 0;
+            addSpot({ x: p.x, z: p.z, r: 3.4, color: 0xffe9a0, label: '🙌 남자 만들기', kind: 'act',
+              build(g) { const m = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.8, .35, 20), lam(0xb08a5a)); m.position.y = .17; g.add(m); },
+              onUse(it) {
+                sfx.act(); made++;
+                const h = makeHuman(made === 1 ? 0x6ea8ff : 0xff8fb0, made === 1 ? 0x3a2a1a : 0x5a2f1a, made === 1 ? 1.08 : 1);
+                h.position.set(p.x + (made === 1 ? -1.6 : 1.6), hNow(p.x, p.z) + .2, p.z + 1); h.rotation.y = made === 1 ? .6 : -.6; scene.add(h); grow(h, 1.6);
+                humans.push({ g: h, y0: h.position.y, ph: made });
+                burst(h.position, 0xffe9a0, 60);
+                if (made === 1) it.label = '🙌 여자 만들기'; else retire(it);
+                progress();
+              } });
+          } },
+        { say: '“온 땅을 채우고 돌보아라. 씨 맺는 채소와 열매를 먹을 것으로 주겠다!”', ref: '창세기 1:28–29', hint: '나무에서 열매 3개를 따서(행동) 사람들에게 가져다주어요(행동).', unit: '먹을 것 나눔', total: 3, showFruit: true,
+          good: '보시기에 심히 좋았어요! (1:31)',
+          start() {
+            trees.forEach(tr => addSpot({ x: tr.x, z: tr.z, r: 4, color: 0xff6a5a, label: '🍎 열매 따기', beacon: true,
+              can: () => S.fruit < 3 && tr.g.userData.fruits.length > 0,
+              onUse(it) { const f = tr.g.userData.fruits.pop(); tr.g.remove(f); S.fruit++; sfx.pick(); burst(it.g.position, 0xff6a5a, 16); updateHud(); } }));
+            addSpot({ x: humanSpot.x, z: humanSpot.z, r: 4.2, color: 0xffe9a0, label: '🍎 먹을 것 주기', ring: true, beacon: false,
+              can: () => S.fruit > 0,
+              onUse(it) { S.fruit--; sfx.good(); burst(it.g.position, 0xffe9a0, 30); updateHud(); progress(); } });
+          } }
+      ] },
+    /* ---------- 7 ---------- */
+    { title: '쉼', ref: '창세기 2:1–3',
+      verse: '이렇게 하늘과 땅과 그 안의 모든 것이 다 만들어졌어요. 일곱째 날에 하나님은 하시던 일을 마치시고 쉬셨어요. 그리고 일곱째 날을 복 주시고 거룩한 날로 정하셨어요.',
+      close: '하나님이 일곱째 날을 복 주시고 거룩하게 하셨어요.', closeRef: '창세기 2:3',
+      recap: '하나님이 일을 마치고 쉬시며 이 날을 복되고 거룩하게 하셨어요.',
+      stages: [
+        { say: '“보아라, 내가 만든 모든 것이 참 좋구나!”', ref: '창세기 1:31', hint: '세 곳의 전망대에 올라 하나님이 지으신 세상을 둘러봐요.', unit: '전망대', total: 3,
+          good: '하나님이 지으신 모든 것이 아주 좋았어요! (1:31)',
+          start() {
+            const hills = [findSpot(25, 85, [h => h > 4.2, h => h > 3.2, h => h > 1.7], [], 10), { x: fishSpots[0].x, z: fishSpots[0].z }, { x: trees[0].x, z: trees[0].z }];
+            const names = ['🏔️ 언덕에서 둘러보기', '🌊 바닷가에서 둘러보기', '🌳 숲에서 둘러보기'];
+            hills.forEach((p, i) => addSpot({ x: p.x, z: p.z, r: 3.6, color: 0xfff0a0, label: names[i],
+              onUse(it) { sfx.good(); burst(it.g.position, 0xfff0a0, 70); toast('참 좋구나!', 1800); retire(it); progress(); } }));
+          } },
+        { say: '“일곱째 날, 하나님이 하시던 일을 마치고 쉬셨어요.”', ref: '창세기 2:2–3', hint: '쉼 자리로 가서 “쉬기”를 눌러요. 10초 동안 가만히 하나님이 주신 쉼을 누려요.', unit: '쉼', total: 1,
+          good: '하나님이 일곱째 날을 복 주시고 거룩하게 하셨어요. (2:3)',
+          start() {
+            const p = ang(270, 4);
+            addSpot({ x: p.x, z: p.z, r: 3.6, color: 0xffd7a0, label: '😌 쉬기 (10초)',
+              build(g) { const b = new THREE.Mesh(new THREE.BoxGeometry(2.4, .5, .9), lam(0x9b7a52)); b.position.y = .25; g.add(b); const c = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, .06, 28), basic(0xffd7a0, { transparent: true, opacity: .25 })); c.position.y = .06; g.add(c); },
+              onUse(it) {
+                sfx.act(); retire(it); S.resting = 10; S.cycle = false; $('act').hidden = true; toast('가만히… 쉬어요 😌', 2500);
+                St.tick = (dt) => { S.tod = approach(S.tod, 0.44, dt * .08); if (S.resting <= 0 && !St.locked) { progress(); } };
+              } });
+          } }
+      ] }
+  ];
+  const TOTAL_STAGES = DAYS.reduce((s, d) => s + d.stages.length, 0);
+
+  /* ================= 입력 ================= */
+  const keys = {};
+  addEventListener('keydown', e => {
+    if (e.code === 'Space' || e.code === 'Enter') { if (!overlayOpen()) { e.preventDefault(); if (!e.repeat) doAct(); } return; }
+    keys[e.code] = true;
+    if (e.code.startsWith('Arrow')) e.preventDefault();
+  });
+  addEventListener('keyup', e => { keys[e.code] = false; });
+  const joy = { x: 0, y: 0, id: null };
+  const stick = $('stick'), knob = $('knob');
+  function joyMove(e) {
+    const r = stick.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    let dx = (e.clientX - cx) / (r.width / 2), dy = (e.clientY - cy) / (r.height / 2); const l = Math.hypot(dx, dy);
+    if (l > 1) { dx /= l; dy /= l; }
+    joy.x = dx; joy.y = -dy; knob.style.transform = `translate(${dx * 42}px,${dy * 42}px)`;
+  }
+  stick.addEventListener('pointerdown', e => { joy.id = e.pointerId; stick.setPointerCapture(e.pointerId); joyMove(e); });
+  stick.addEventListener('pointermove', e => { if (e.pointerId === joy.id) joyMove(e); });
+  const joyEnd = e => { if (e.pointerId === joy.id) { joy.id = null; joy.x = joy.y = 0; knob.style.transform = ''; } };
+  stick.addEventListener('pointerup', joyEnd); stick.addEventListener('pointercancel', joyEnd);
+  let drag = null;
+  canvas.addEventListener('pointerdown', e => { drag = { id: e.pointerId, x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    P.yaw -= (e.clientX - drag.x) * 0.005; P.pitch = Math.min(1.1, Math.max(0.12, P.pitch + (e.clientY - drag.y) * 0.004));
+    drag.x = e.clientX; drag.y = e.clientY;
+  });
+  const dragEnd = e => { if (drag && e.pointerId === drag.id) drag = null; };
+  canvas.addEventListener('pointerup', dragEnd); canvas.addEventListener('pointercancel', dragEnd);
+  $('act').addEventListener('click', doAct);
+
+  /* 가까운 행동 지점 */
+  let near = null;
+  function findNear() {
+    near = null; let best = 1e9;
+    for (const it of spots) {
+      if (it.used || it.kind !== 'act') continue;
+      if (it.can && !it.can()) continue;
+      const d = Math.hypot(it.x - player.position.x, it.z - player.position.z);
+      if (d < it.r && d < best) { best = d; near = it; }
+    }
+  }
+  function doAct() {
+    if (S.paused || S.resting > 0 || !near) return;
+    const it = near; it.onUse(it); findNear();
+  }
+
+  /* ================= 갱신 ================= */
+  const C_DAY = new THREE.Color(0x8fd0ff), C_NIGHT = new THREE.Color(0x141b4a), C_DUSK = new THREE.Color(0xf3a37a), C_MURK = new THREE.Color(0x6b7480), sky = new THREE.Color(), tmp = new THREE.Color();
+  const C_HEMI = new THREE.Color(0xdfeaff), C_HEMI_NIGHT = new THREE.Color(0x7d8fd6);
+  const CLOUD_GRAY = new THREE.Color(0x59606a), CLOUD_WHITE = new THREE.Color(0xffffff);
+  let time = 0, dayF = 1, chimeT = 0;
+
+  function update(dt) {
+    time += dt;
+    /* 이동 */
+    let ix = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0) + joy.x;
+    let iy = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) + joy.y;
+    if (keys.KeyQ) P.yaw += dt * 1.8; if (keys.KeyE) P.yaw -= dt * 1.8;
+    if (S.paused || S.resting > 0) { ix = iy = 0; }
+    const len = Math.hypot(ix, iy);
+    if (len > 0.05) {
+      if (len > 1) { ix /= len; iy /= len; }
+      const sp = 9, fx = -Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = -Math.sin(P.yaw);
+      const vx = (fx * iy + rx * ix) * sp * dt, vz = (fz * iy + rz * ix) * sp * dt;
+      let nx = player.position.x + vx, nz = player.position.z + vz;
+      const ok = (x, z) => hNow(x, z) > 0.15 && Math.hypot(x, z) < 125;
+      if (ok(nx, nz)) { player.position.x = nx; player.position.z = nz; }
+      else if (ok(nx, player.position.z)) player.position.x = nx;
+      else if (ok(player.position.x, nz)) player.position.z = nz;
+      P.face = Math.atan2(vx, vz); P.walk += dt * 10;
+    }
+    let d = P.face - player.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); player.rotation.y += d * Math.min(1, dt * 12);
+    const gy = hNow(player.position.x, player.position.z);
+    player.position.y = gy + (len > .05 ? Math.abs(Math.sin(P.walk)) * .12 : 0);
+    if (S.landK > 0 && S.landK < 1 && gy < 0.15) player.position.y = 0.15;
+
+    /* 휴식 */
+    if (S.resting > 0) {
+      S.resting = Math.max(0, S.resting - dt); P.yaw += dt * .25; P.pitch = approach(P.pitch, .28, dt * .2); P.dist = approach(P.dist, 16, dt * 1.2);
+      St.done = 0; $('barFill').style.width = ((10 - S.resting) / 10 * 100) + '%'; $('count').textContent = `쉼 ${Math.ceil(10 - S.resting)} / 10초`;
+      chimeT -= dt; if (chimeT <= 0) { tone(392 + Math.random() * 130, .9, 'sine', .04); chimeT = 1.6; }
+    }
+    if (St.tick) St.tick(dt);
+
+    /* 지점 */
+    findNear();
+    for (const it of spots) {
+      if (it.used && !it.tick) continue;
+      const dist = Math.hypot(it.x - player.position.x, it.z - player.position.z);
+      if (it.ringM) { const s = it.r / 2.4 + .4 + Math.sin(time * 3 + it.x) * .08; it.ringM.scale.setScalar(s); }
+      if (it.kind === 'auto' && !it.used && dist < it.r) { it.onUse(it); continue; }
+      if (it.tick) it.tick(it, time, dt, dist);
+    }
+    /* 안내 화살표·행동 버튼 */
+    const act = $('act');
+    if (near && !S.paused && S.resting <= 0) { act.hidden = false; act.textContent = near.label; } else act.hidden = true;
+    let tgt = null, bd = 1e9;
+    if (St.def && !St.locked) for (const it of spots) {
+      if (it.used || (it.can && !it.can())) continue;
+      const dd = Math.hypot(it.x - player.position.x, it.z - player.position.z); if (dd < bd) { bd = dd; tgt = it; }
+    }
+    const comp = $('compass');
+    if (tgt && bd > 5 && !S.paused && S.resting <= 0) {
+      comp.hidden = false;
+      const a = Math.atan2(tgt.x - player.position.x, tgt.z - player.position.z), rel = P.yaw + Math.PI - a;
+      $('arrow').style.transform = `rotate(${(rel * 180 / Math.PI).toFixed(1)}deg)`;
+      $('dist').textContent = Math.round(bd) + ' m';
+    } else comp.hidden = true;
+
+    /* 환경 변수 */
+    S.light = approach(S.light, S.lightT, dt * 0.35);
+    S.open = approach(S.open, S.openT, dt * 0.22);
+    S.nightBlend = approach(S.nightBlend, S.nightT, dt * 2.2);
+    let dirty = false;
+    if (S.landK !== S.landT) { S.landK = approach(S.landK, S.landT, dt * 0.2); dirty = true; }
+    if (S.greenK !== S.greenT) { S.greenK = approach(S.greenK, S.greenT, dt * 0.25); dirty = true; }
+    if (dirty) rebuildTerrain();
+    if (S.cycle) S.tod = (S.tod + dt / S.dayLen) % 1;
+
+    const sunH = Math.sin(S.tod * 6.2832);
+    dayF = smooth(-0.12, 0.3, sunH) * (1 - S.nightBlend);
+    const dusk = Math.max(0, 1 - Math.abs(sunH) / 0.3) * (1 - S.nightBlend);
+    sky.copy(C_NIGHT).lerp(C_DAY, dayF).lerp(C_DUSK, dusk * .7).lerp(C_MURK, (1 - S.open) * .8 * dayF).multiplyScalar(S.light);
+    scene.background = sky; scene.fog.color.copy(sky);
+    scene.fog.near = lerp(4, 70, S.open * S.open) + (S.light > 0 ? 6 : 0); scene.fog.far = lerp(38, 250, S.open);
+    hemi.intensity = S.light * (0.55 + 0.4 * dayF); hemi.color.copy(C_HEMI_NIGHT).lerp(C_HEMI, dayF).lerp(C_DUSK, dusk * .5);
+    hemi.groundColor.set(0x505840).multiplyScalar(0.7 + 0.3 * dayF);
+    sunLight.intensity = S.light * dayF * 0.9; sunLight.color.set(0xfff0d0).lerp(C_DUSK, dusk * .6);
+    lantern.position.set(player.position.x, player.position.y + 2.2, player.position.z);
+    lantern.intensity = 1.3 * (1 - 0.75 * S.light * dayF);
+
+    /* 하늘 물건 */
+    skyG.position.copy(camera.position);
+    const a = S.tod * 6.2832;
+    sunM.position.set(Math.cos(a) * 240, Math.sin(a) * 240, -60); moonM.position.set(-Math.cos(a) * 240, -Math.sin(a) * 240, -60);
+    sunLight.position.set(player.position.x + Math.cos(a) * 120, player.position.y + Math.max(20, Math.sin(a) * 120), player.position.z - 30); sunLight.target.position.copy(player.position);
+    starPts.material.opacity = Math.max(0, 1 - dayF * 1.3) * S.light;
+    sunM.scale.setScalar(approach(sunM.scale.x, 1, dt * 1.5)); moonM.scale.setScalar(approach(moonM.scale.x, 1, dt * 1.5));
+
+    /* 구름 */
+    const cy = lerp(14, 62, S.open);
+    cloudMat.color.copy(CLOUD_GRAY).lerp(CLOUD_WHITE, S.open);
+    clouds.forEach(c => { c.position.y = cy + c.userData.off * (0.4 + S.open); c.position.x += c.userData.drift * dt * .5 * S.open; if (c.position.x > 170) c.position.x = -170; c.scale.setScalar(lerp(1.3, 1, S.open)); });
+
+    /* 물 */
+    water.position.y = Math.sin(time * .8) * .05;
+    water.material.opacity = 0.84;
+
+    /* 자라기·반짝임 */
+    for (let i = grows.length - 1; i >= 0; i--) {
+      const g = grows[i]; g.t += dt; const k = Math.min(1, g.t / g.dur), e = 1 - Math.pow(1 - k, 3), ov = k < 1 ? 1 + Math.sin(k * 3.14) * .12 : 1;
+      g.obj.scale.setScalar(lerp(g.from, 1, e) * ov); if (k >= 1) grows.splice(i, 1);
+    }
+    for (let i = bursts.length - 1; i >= 0; i--) {
+      const b = bursts[i]; b.life -= dt; const arr = b.p.geometry.attributes.position;
+      for (let j = 0; j < b.vel.length; j++) { b.vel[j].y -= 9 * dt; arr.setXYZ(j, arr.getX(j) + b.vel[j].x * dt, arr.getY(j) + b.vel[j].y * dt, arr.getZ(j) + b.vel[j].z * dt); }
+      arr.needsUpdate = true; b.p.material.opacity = Math.max(0, b.life / 1.4);
+      if (b.life <= 0) { scene.remove(b.p); b.p.geometry.dispose(); b.p.material.dispose(); bursts.splice(i, 1); }
+    }
+    updateDecor(dt);
+    for (let i = anims.length - 1; i >= 0; i--) if (anims[i](dt)) anims.splice(i, 1);
+
+    /* 나무 열매 흔들림 (없음) / 사람 */
+    humans.forEach(h => { h.g.position.y = h.y0 + Math.sin(time * 1.5 + h.ph) * .05; });
+    /* 물고기 */
+    schools.forEach(s => {
+      if (s.fish.length < s.want && Math.random() < dt * 4) {
+        const g = makeFish(pick([0xff8a3d, 0xffc93d, 0x4db7ff, 0xf25c8f])); scene.add(g); s.fish.push({ g, a: rnd(0, 6.28), rad: rnd(2, 8), sp: rnd(.5, 1) * (Math.random() < .5 ? 1 : -1), ph: rnd(0, 6.28) });
+      }
+      s.fish.forEach(f => {
+        f.a += f.sp * dt; const x = s.cx + Math.cos(f.a) * f.rad, z = s.cz + Math.sin(f.a) * f.rad;
+        const jump = Math.pow(Math.max(0, Math.sin(time * 1.3 + f.ph * 7)), 10) * 1.8;
+        f.g.position.set(x, 0.05 + jump, z); f.g.rotation.y = Math.atan2(-Math.sign(f.sp) * Math.cos(f.a), -Math.sign(f.sp) * Math.sin(f.a)); f.g.rotation.z = jump > .1 ? .5 : 0;
+      });
+    });
+    /* 새 */
+    flocks.forEach(f => f.birds.forEach(b => {
+      b.a += b.sp * dt; const x = f.cx + Math.cos(b.a) * b.rad, z = f.cz + Math.sin(b.a) * b.rad;
+      b.g.position.set(x, b.alt + Math.sin(time + b.ph) * 1.2, z); b.g.rotation.y = Math.atan2(-Math.cos(b.a), -Math.sin(b.a));
+      const fl = Math.sin(time * 9 + b.ph) * .7; b.g.userData.l.rotation.x = Math.PI / 2 + fl; b.g.userData.r.rotation.x = Math.PI / 2 - fl;
+    }));
+    /* 동물 */
+    critters.forEach(c => {
+      c.t += dt;
+      const dx = c.target.x - c.g.position.x, dz = c.target.z - c.g.position.z, dd = Math.hypot(dx, dz);
+      if (dd < .6) { c.wait -= dt; if (c.wait <= 0) { const a = rnd(0, 6.28), r = rnd(2, 7); c.target = { x: c.home.x + Math.cos(a) * r, z: c.home.z + Math.sin(a) * r }; c.wait = rnd(1, 3.5); } }
+      else {
+        const nx = c.g.position.x + dx / dd * c.speed * dt, nz = c.g.position.z + dz / dd * c.speed * dt;
+        if (hNow(nx, nz) > 0.4) { c.g.position.x = nx; c.g.position.z = nz; } else c.wait = 0, c.target = { x: c.home.x, z: c.home.z };
+        const da = Math.atan2(Math.sin(Math.atan2(dx, dz) - c.g.rotation.y), Math.cos(Math.atan2(dx, dz) - c.g.rotation.y)); c.g.rotation.y += da * Math.min(1, dt * 6);
+      }
+      c.g.position.y = hNow(c.g.position.x, c.g.position.z) + (dd > .6 ? Math.abs(Math.sin(c.t * 7)) * .08 : 0);
+      if (c.kind === 'snake') { const segs = c.g.children[0].userData.segs; if (segs) segs.forEach((s, i) => { s.position.x = Math.sin(c.t * 4 - i * .8) * .25; }); }
+    });
+
+    /* 카메라 */
+    P.dist = approach(P.dist, S.resting > 0 ? P.dist : 11, dt * 3);
+    const tx = player.position.x, ty = player.position.y + 2.2, tz = player.position.z;
+    let cx = tx + Math.sin(P.yaw) * Math.cos(P.pitch) * P.dist, cz = tz + Math.cos(P.yaw) * Math.cos(P.pitch) * P.dist, cyy = ty + Math.sin(P.pitch) * P.dist;
+    cyy = Math.max(cyy, hNow(cx, cz) + 1.2, 0.8);
+    camera.position.set(cx, cyy, cz); camera.lookAt(tx, ty + 2.2, tz);
+
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    update(dt);
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

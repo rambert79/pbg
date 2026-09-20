@@ -11,6 +11,7 @@ Play Board Games
 | [`exodus-red-sea/`](exodus-red-sea/) | Exodus: Red Sea | 말씀을 타이핑하여 바다를 가르는 게임 |
 | [`bible-card-memory/`](bible-card-memory/) | Bible Card Memory | 성경 인물 카드 짝 맞추기 팀 대결 |
 | [`jabbok-night/`](jabbok-night/) | 얍복 강의 밤 | 천사와 씨름한 야곱 이야기 (창세기 32장), 씨름·퀴즈 게임 |
+| [`creation-days/`](creation-days/) | 창조의 7일 | 창세기 1장, 7일간의 창조를 말씀대로 수행하는 3D 오픈맵 (Three.js 포함) |
 
 ## 구조
 
