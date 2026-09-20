@@ -30,6 +30,8 @@
   .star{color:var(--gold)}
 
   .screen{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:0 16px 16px;z-index:4}
+  .screen:not(.center):not(#s-wrestle){padding-bottom:calc(16px + 16vh)}
+  .screen:not(.center):not(#s-wrestle) .card{max-height:calc(100vh - 16vh - 72px)}
   .screen.center{top:0;align-items:center;padding-block:56px 16px}
   .card{width:100%;max-width:760px;max-height:calc(100% - 8px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px 22px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:0 18px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:14px;animation:rise .35s ease-out}
   @keyframes rise{from{transform:translateY(10px);opacity:.6}to{transform:none;opacity:1}}
@@ -281,8 +283,8 @@
   };
 
   const MODES = {
-    easy: { force: [16, 21, 26], tap: 6, dur: 16, surge: 12 },
-    hard: { force: [25, 31, 37], tap: 5.5, dur: 18, surge: 18 }
+    easy: { force: [20, 26, 32], tap: 5.5, dur: 16, surge: 14 },
+    hard: { force: [29, 36, 43], tap: 5, dur: 18, surge: 20 }
   };
 
   const DAWN = [[0.04, 0.24], [0.24, 0.44], [0.44, 0.64]];
